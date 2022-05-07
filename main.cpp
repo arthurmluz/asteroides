@@ -43,25 +43,28 @@ using namespace std;
 
 #include "util/bezierFunc.h"
 #include "util/desenhar.h"
+#include "util/util.h"
 
+#define NMONSTROS 3
 Temporizador T;
 double AccumDeltaT=0;
 
 Instancia Universo[10];
+Instancia jogador;
 
 // Limites l�gicos da �rea de desenho
 Ponto Min, Max;
 
 bool desenha = false;
 
-Poligono Mapa, MeiaSeta, Mastro; //monstro, disparador;
+Poligono monstro, disparador;
 int nInstancias=0;
 
 float angulo=0.0;
 
 void CriaInstancias();
 
-Ponto Curva1[3];
+Ponto curvas[NMONSTROS][3];
 
 bool animando = false;
 
@@ -71,20 +74,19 @@ bool animando = false;
 // **************************************************************
 void CarregaModelos()
 {
-    Mapa.LePoligono("txts/EstadoRS.txt");
-    MeiaSeta.LePoligono("txts/MeiaSeta.txt");
-    Mastro.LePoligono("txts/Mastro.txt");
-//    monstro.LePoligono("txts/monstro1.txt");
-//    disparador.LePoligono("txts/disparador.txt");
+    monstro.LePoligono("txts/monstro1.txt");
+    disparador.LePoligono("txts/disparador.txt");
 }
 // **************************************************************
 //
 // **************************************************************
 void CriaCurvas()
 {
-    Curva1[0] = Ponto (-5,-5);
-    Curva1[1] = Ponto (0,6);
-    Curva1[2] = Ponto (5,-5);
+    for(int i = 0; i < NMONSTROS; i++){
+        curvas[i][0] = pontoAleatorio(Min, Max);
+        curvas[i][1] = Ponto(0, 0);
+        curvas[i][2] = Ponto(0, 0);
+    }
 }
 // **************************************************************
 //
@@ -94,13 +96,13 @@ void init()
     // Define a cor do fundo da tela (AZUL)
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
+    float d = 10;
+    Min = Ponto(-d,-d);
+    Max = Ponto(d,d);
+
     CarregaModelos();
     CriaCurvas();
     CriaInstancias();
-    
-    float d = 7;
-    Min = Ponto(-d,-d);
-    Max = Ponto(d,d);
     
 }
 
@@ -180,19 +182,33 @@ void DesenhaEixos()
 }
 
 // ****************************************************************
-void DesenhaCatavento()
-{
-    glLineWidth(3);
+//void DesenhaCatavento()
+//{
+//    glLineWidth(3);
+//    glPushMatrix();
+//        defineCor(BrightGold);
+//        DesenhaMastro(Mastro);
+//        glPushMatrix();
+//            glColor3f(1,0,0); // R, G, B  [0..1]
+//            glTranslated(0,3,0);
+//            glScaled(0.2, 0.2, 1);
+//            defineCor(YellowGreen);
+//            DesenhaHelicesGirando(MeiaSeta, angulo);
+//        glPopMatrix();
+//    glPopMatrix();
+//}
+
+void desenhaDisparador(){
     glPushMatrix();
-        defineCor(BrightGold);
-        DesenhaMastro(Mastro);
-        glPushMatrix();
-            glColor3f(1,0,0); // R, G, B  [0..1]
-            glTranslated(0,3,0);
-            glScaled(0.2, 0.2, 1);
-            defineCor(YellowGreen);
-            DesenhaHelicesGirando(MeiaSeta, angulo);
-        glPopMatrix();
+        glLineWidth(2);
+        disparador.desenhaPoligono();
+    glPopMatrix();
+}
+
+void desenhaMonstro(){
+    glPushMatrix();
+        glLineWidth(2);
+        monstro.desenhaPoligono();
     glPopMatrix();
 }
 
@@ -203,36 +219,49 @@ void DesenhaCatavento()
 
 void CriaInstancias()
 {
-    Universo[0].posicao = Ponto (0,0);
+    jogador.posicao = Ponto(0,0) ;
+    jogador.rotacao = 0;
+    jogador.modelo = desenhaDisparador;
+    jogador.escala = Ponto(2, 2, 2);
+
+    Universo[0].posicao = Ponto (5,5);
     Universo[0].rotacao = 0;
-    Universo[0].modelo = DesenhaCatavento;
-    Universo[0].escala = Ponto (1,1,1);
+    Universo[0].modelo = desenhaMonstro;
+    Universo[0].escala = Ponto (2,2,2);
 
     Universo[1].posicao = Ponto (3,0);
     Universo[1].rotacao = -90;
-    Universo[1].modelo = DesenhaCatavento;
+    Universo[1].modelo = desenhaMonstro;
     
     Universo[2].posicao = Ponto (0,-5);
     Universo[2].rotacao = 0;
-    Universo[2].modelo = DesenhaCatavento;
+    Universo[2].modelo = desenhaMonstro;
 
     Universo[3].posicao = Ponto (-5,-5);
     Universo[3].rotacao = 0;
-    Universo[3].modelo = DesenhaCatavento;
-    
-
-    
-    nInstancias = 4;
+    Universo[3].modelo = desenhaMonstro;
 
 }
 
 
 // ****************************************************************
-void DesenhaUniverso()
-{
-    for(int i=0; i<nInstancias;i++)
+void desenhaMonstros(){
+
+    Ponto pontosUteis[2]{};
+    pontosUteis[0] = jogador.posicao;
+
+    for(int i=0; i<NMONSTROS;i++)
     {
+        pontosUteis[1] = pontoAleatorio(Min, Max);
+
+        andarNaBezier(Universo[i], pontosUteis, curvas[i]);
         Universo[i].desenha();
+
+            defineCor(NavyBlue);
+            TracaBezier3Pontos(curvas[i]);
+            defineCor(Pink);
+            TracaPontosDeControle(curvas[i]);
+
     }
 }
 // ****************************************************************
@@ -257,13 +286,19 @@ void display( void )
     DesenhaEixos();
     
     glLineWidth(1);
-   
-    andarNaBezier(Universo[3], Curva1);
-    DesenhaUniverso();
+
     defineCor(VioletRed);
-    TracaBezier3Pontos(Curva1);
-    defineCor(MandarinOrange);
-    TracaPontosDeControle(Curva1);
+    jogador.desenha();
+
+//    defineCor(MandarinOrange);
+//    desenhaMonstros();
+
+//    andarNaBezier(Universo[3], Curva1);
+//    DesenhaUniverso();
+//    defineCor(VioletRed);
+//    TracaBezier3Pontos(Curva1);
+//    defineCor(MandarinOrange);
+//    TracaPontosDeControle(Curva1);
     
     double dt;
     dt = T.getDeltaT();

@@ -43,22 +43,13 @@ void TracaBezier3Pontos(Ponto curva[])
 }
 
 // *****************************************************************
-void andarNaBezier(Instancia &andador, Ponto curva[]){
+void andarNaBezier(Instancia &andador, Ponto pontosUteis[], Ponto curva[]){
     if(andador.tAtual > 1.0 || andador.tAtual < 0.0){
          andador.tAtual = 0;
         //andador.deltaT *= -1;
         curva[0] = curva[2];
-        for(int i = 1; i < 3; i++){
-            float x = rand() % 15;
-            float y = rand() % 15;
-            if( x > 7 ){
-                x = (x - 7) * -1;
-            }
-            if( y > 7 ){
-               y = (y - 7) * -1;
-            }
-            curva[i] = Ponto(x, y);
-        }
+        curva[1] = pontosUteis[0]; // 0 = disparador.posicao
+        curva[2] = pontosUteis[1]; // 1 = ponto aleatorio
     }
     //andador.rotacao += andador.deltaT * 50;
     Ponto P = CalculaBezier3(curva, andador.tAtual);

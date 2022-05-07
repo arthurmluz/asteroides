@@ -20,7 +20,7 @@
 void TracaPontosDeControle(Ponto PC[]);
 Ponto CalculaBezier3(Ponto PC[], double t);
 void TracaBezier3Pontos(Ponto curva[]);
-void andarNaBezier(Instancia &andador, Ponto curva[]);
+void andarNaBezier(Instancia &andador, Ponto pontosUteis[], Ponto curva[]);
 
 
 #endif

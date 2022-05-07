@@ -18,7 +18,7 @@ typedef void TipoFuncao();
 class Instancia{
 public:
     //Poligono *modelo;
-    int nroCurva;
+    int nroCurva; // nao consigo deletar sem bugar
     float tAtual;
     float deltaT = 1.0/50;
     Instancia();
