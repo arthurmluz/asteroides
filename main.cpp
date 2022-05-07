@@ -6,12 +6,11 @@
 //
 // Marcio Sarroglia Pinho
 // pinho@pucrs.br
+// 
+//  Trabalho 2 - Asteroides
+//   Arthur Musskopf da Luz & Manoella Jarces de Azevedo
 // **********************************************************************
 
-// Para uso no Xcode:
-// Abra o menu Product -> Scheme -> Edit Scheme -> Use custom working directory
-// Selecione a pasta onde voce descompactou o ZIP que continha este arquivo.
-//
 
 #include <iostream>
 #include <cmath>
@@ -36,11 +35,14 @@ using namespace std;
 #include <GL/glut.h>
 #endif
 
-#include "Ponto.h"
-#include "Instancia.h"
+#include "app/Ponto.h"
+#include "app/Instancia.h"
 
-#include "Temporizador.h"
-#include "ListaDeCoresRGB.h"
+#include "app/Temporizador.h"
+#include "app/ListaDeCoresRGB.h"
+
+#include "util/bezierFunc.h"
+#include "util/desenhar.h"
 
 Temporizador T;
 double AccumDeltaT=0;
@@ -52,7 +54,7 @@ Ponto Min, Max;
 
 bool desenha = false;
 
-Poligono Mapa, MeiaSeta, Mastro;
+Poligono Mapa, MeiaSeta, Mastro; //monstro, disparador;
 int nInstancias=0;
 
 float angulo=0.0;
@@ -63,77 +65,17 @@ Ponto Curva1[3];
 
 bool animando = false;
 
-// **************************************************************
-void TracaPontosDeControle(Ponto PC[])
-{
-    glPointSize(10);
-    glBegin(GL_POINTS);
-        glVertex3f(PC[0].x, PC[0].y, PC[0].z);
-        glVertex3f(PC[1].x, PC[1].y, PC[1].z);
-        glVertex3f(PC[2].x, PC[2].y, PC[2].z);
-    glEnd();
-}
-// **************************************************************
-Ponto CalculaBezier3(Ponto PC[], double t)
-{
-    Ponto P;
-    double UmMenosT = 1-t;
-    
-    P =  PC[0] * UmMenosT * UmMenosT + PC[1] * 2 * UmMenosT * t + PC[2] * t*t;
-    return P;
-}
 
-// *****************************************************************
-void TracaBezier3Pontos()
-{
-    double t=0.0;
-    double DeltaT = 1.0/50;
-    Ponto P;
-    //cout << "DeltaT: " << DeltaT << endl;
-    glBegin(GL_LINE_STRIP);
-    
-    while(t<1.0)
-    {
-        P = CalculaBezier3(Curva1, t);
-        glVertex2f(P.x, P.y);
-        t += DeltaT;
-    }
-    P = CalculaBezier3(Curva1, 1.0); // faz o acabamento da curva
-    glVertex2f(P.x, P.y);
-    
-    glEnd();
-}
-
-void andaBezier(Instancia &andador){
-    if(andador.tAtual > 1.0 || andador.tAtual < 0.0){
-         andador.tAtual = 0;
-        //andador.deltaT *= -1;
-        Curva1[0] = Curva1[2];
-        for(int i = 1; i < 3; i++){
-            float x = rand() % 15;
-            float y = rand() % 15;
-            if( x > 7 ){
-                x = (x - 7) * -1;
-            }
-            if( y > 7 ){
-               y = (y - 7) * -1;
-            }
-            Curva1[i] = Ponto(x, y);
-        }
-    }
-    //andador.rotacao += andador.deltaT * 50;
-    Ponto P = CalculaBezier3(Curva1, andador.tAtual);
-    andador.posicao = P;
-    andador.tAtual += andador.deltaT;
-}
 // **************************************************************
 //
 // **************************************************************
 void CarregaModelos()
 {
-    Mapa.LePoligono("EstadoRS.txt");
-    MeiaSeta.LePoligono("MeiaSeta.txt");
-    Mastro.LePoligono("Mastro.txt");
+    Mapa.LePoligono("txts/EstadoRS.txt");
+    MeiaSeta.LePoligono("txts/MeiaSeta.txt");
+    Mastro.LePoligono("txts/Mastro.txt");
+//    monstro.LePoligono("txts/monstro1.txt");
+//    disparador.LePoligono("txts/disparador.txt");
 }
 // **************************************************************
 //
@@ -209,14 +151,14 @@ void reshape( int w, int h )
     glLoadIdentity();
 }
 // ****************************************************************
-//
+// nao sei pra que serve
 // ****************************************************************
-void RotacionaAoRedorDeUmPonto(float alfa, Ponto P)
-{
-    glTranslatef(P.x, P.y, P.z);
-    glRotatef(alfa, 0,0,1);
-    glTranslatef(-P.x, -P.y, -P.z);
-}
+//void RotacionaAoRedorDeUmPonto(float alfa, Ponto P)
+//{
+//    glTranslatef(P.x, P.y, P.z);
+//    glRotatef(alfa, 0,0,1);
+//    glTranslatef(-P.x, -P.y, -P.z);
+//}
 // **************************************************************
 //
 // **************************************************************
@@ -237,65 +179,24 @@ void DesenhaEixos()
     glEnd();
 }
 
-// **********************************************************************
-void DesenhaSeta()
-{
-    glPushMatrix();
-        MeiaSeta.desenhaPoligono();
-        glScaled(1,-1, 1);
-        MeiaSeta.desenhaPoligono();
-    glPopMatrix();
-}
-// **********************************************************************
-void DesenhaApontador()
-{
-    glPushMatrix();
-        glTranslated(-4, 0, 0);
-        DesenhaSeta();
-    glPopMatrix();
-}
-// ****************************************************************
-void DesenhaHelice()
-{
-    glPushMatrix();
-    for(int i=0;i < 4; i++)
-    {
-        glRotatef(90, 0, 0, 1);
-        DesenhaApontador();
-    }
-    glPopMatrix();
-}
-// ****************************************************************
-
-void DesenhaHelicesGirando()
-{
-    glPushMatrix();
-        glRotatef(angulo, 0, 0, 1);
-        DesenhaHelice();
-   glPopMatrix();
-}
-// ****************************************************************
-
-void DesenhaMastro()
-{
-    Mastro.desenhaPoligono();
-}
 // ****************************************************************
 void DesenhaCatavento()
 {
     glLineWidth(3);
     glPushMatrix();
         defineCor(BrightGold);
-        DesenhaMastro();
+        DesenhaMastro(Mastro);
         glPushMatrix();
             glColor3f(1,0,0); // R, G, B  [0..1]
             glTranslated(0,3,0);
             glScaled(0.2, 0.2, 1);
             defineCor(YellowGreen);
-            DesenhaHelicesGirando();
+            DesenhaHelicesGirando(MeiaSeta, angulo);
         glPopMatrix();
     glPopMatrix();
 }
+
+
 // ****************************************************************
 // Esta fun��o deve instanciar todos os personagens do cen�rio
 // ****************************************************************
@@ -357,10 +258,10 @@ void display( void )
     
     glLineWidth(1);
    
-    andaBezier(Universo[3]);
+    andarNaBezier(Universo[3], Curva1);
     DesenhaUniverso();
     defineCor(VioletRed);
-    TracaBezier3Pontos();
+    TracaBezier3Pontos(Curva1);
     defineCor(MandarinOrange);
     TracaPontosDeControle(Curva1);
     
