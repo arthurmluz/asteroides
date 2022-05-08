@@ -47,14 +47,14 @@ using namespace std;
 #include "util/movimentos.h"
 
 #define NMONSTROS 3
-#define NTIROS 10
+#define NTIROS 20
 #define TAM_MAPA 100
 Temporizador T;
 double AccumDeltaT=0;
 
 Instancia Universo[NMONSTROS];
 Instancia jogador;
-Instancia tiros[NTIROS];
+vector<Instancia> tiros;
 
 // Limites l�gicos da �rea de desenho
 Ponto Min, Max;
@@ -206,7 +206,7 @@ void desenhaTiro(){
     glPushMatrix();
         glLineWidth(1);
         //glTranslatef(-0.25, 0, 0);
-        tiro.desenhaPoligono();
+        tiro.pintaPoligono();
     glPopMatrix();
 }
 
@@ -231,14 +231,6 @@ void CriaInstancias()
     jogador.escala = Ponto(escala, escala, escala);
     jogador.vidas = 3;
 
-
-    for(int i = 0; i < NTIROS; i++ ){
-        tiros[i].modelo = desenhaTiro;
-        tiros[i].dir.y = 4 * TAM_MAPA/100;
-//        tiros[i].escala = Ponto(escala, escala, escala);
-        tiros[i].escala = Ponto(10, 10, 10);
-    }
-
     for(int i = 0; i < NMONSTROS; i++ ){
         Universo[i].rotacao = 0;
         Universo[i].modelo = desenhaMonstro;
@@ -250,21 +242,24 @@ void CriaInstancias()
 }
 
 // ****************************************************************
+
 void atirar(){
     if(atirados == 10) return;
 
-    tiros[atirados].posicao = jogador.posicao;
-    tiros[atirados].rotacao = jogador.rotacao;
+    tiros.push_back(Instancia());
+    Instancia &novoTiro = tiros.back();
+    novoTiro.modelo = desenhaTiro;
+    novoTiro.escala = Ponto(10, 10, 10);
 
-    float alfa = (tiros[atirados].rotacao * M_PI)/180.0f;
+    novoTiro.rotacao = jogador.rotacao;
+    float alfa = (novoTiro.rotacao * M_PI)/180.0f;
     float xr = cos(alfa) * 0 + (-sin(alfa) * 2);
     float yr = sin(alfa) * 0 + cos(alfa) * 2;
-    tiros[atirados].dir = Ponto(xr, yr);
+    novoTiro.dir = Ponto(xr, yr);
 
-    tiros[atirados].posicao = tiros[atirados].dir*3; 
+    novoTiro.posicao = novoTiro.dir*3 + jogador.posicao; 
 
     atirados++;
-
 }
 
 // ****************************************************************
@@ -277,6 +272,7 @@ void desenhaMonstros(){
     {
         pontosUteis[1] = pontoAleatorio(Min, Max);
 
+        defineCor(MandarinOrange);
         andarNaBezier(Universo[i], pontosUteis, curvas[i]);
         Universo[i].desenha();
 
@@ -318,10 +314,13 @@ void desenhaJogador(){
 }
 
 void desenhaTiros(){
-    for(int i = 0; i < atirados; i++){
-        tiros[i].posicao = tiros[i].posicao + tiros[i].dir; 
-        printf("(%f, %f)\n", tiros[i].posicao.x, tiros[i].posicao.y);
-        tiros[i].desenha();
+    for(Instancia &it: tiros){
+        it.posicao = it.posicao + it.dir;
+        it.desenha();
+        if( it.posicao.x > Max.x || it.posicao.x < Min.x || it.posicao.y > Max.x || it.posicao.y < Min.y ){
+            atirados--;
+            tiros.erase(tiros.begin());
+        }
 
     }
 }
@@ -358,8 +357,7 @@ void display( void )
 
     defineCor(Yellow);
     desenhaTiros();
-//    defineCor(MandarinOrange);
-//    desenhaMonstros();
+    desenhaMonstros();
 
     glLineWidth(2);
     defineCor(Red);
@@ -423,7 +421,6 @@ void keyboard ( unsigned char key, int x, int y )
             break;
         case ' ':
             atirar();
-            printf("pew pew \n");
         break;
         case 'p':
             pause = !pause;
@@ -435,6 +432,7 @@ void keyboard ( unsigned char key, int x, int y )
             jogador.posicao = Ponto(0,0);
             jogador.rotacao = 0;
             jogador.dir = Ponto(0,0,0);
+            atirados = 0;
         default:
 			break;
 	}
@@ -492,7 +490,7 @@ int  main ( int argc, char** argv )
     glutInitWindowPosition (0,0);
 
     // Define o tamanho inicial da janela grafica do programa
-    glutInitWindowSize  ( 500, 500);
+    glutInitWindowSize  ( 1000, 1000);
 
     // Cria a janela na tela, definindo o nome da
     // que aparecera na barra de t�tulo da janela.
