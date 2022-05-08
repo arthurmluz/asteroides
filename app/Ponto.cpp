@@ -150,6 +150,16 @@ Ponto operator* (Ponto P1, float k)
     return temp;
 }
 
+Ponto operator/ (Ponto P1, float k)
+{
+    Ponto temp;
+    temp.x = P1.x / k;
+    temp.y = P1.y / k;
+    temp.z = P1.z / k;
+    return temp;
+}
+
+
 Ponto operator-(Ponto P1)
 {
     return P1 * -1;

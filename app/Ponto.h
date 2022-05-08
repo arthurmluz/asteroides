@@ -41,6 +41,7 @@ bool operator==(Ponto P1, Ponto P2);
 Ponto operator+(Ponto P1, Ponto P2);
 Ponto operator- (Ponto P1, Ponto P2);
 Ponto operator* (Ponto P1, float k);
+Ponto operator/ (Ponto P1, float k);
 Ponto operator-(Ponto P1);
 
 double ProdEscalar(Ponto v1, Ponto v2);

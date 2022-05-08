@@ -47,6 +47,7 @@ using namespace std;
 #include "util/movimentos.h"
 
 #define NMONSTROS 3
+#define TAM_MAPA 10
 Temporizador T;
 double AccumDeltaT=0;
 
@@ -56,7 +57,7 @@ Instancia jogador;
 // Limites l�gicos da �rea de desenho
 Ponto Min, Max;
 
-bool desenha = false;
+bool desenha = false, pause = false;
 
 Poligono monstro, disparador;
 int nInstancias=0;
@@ -68,6 +69,8 @@ void CriaInstancias();
 Ponto curvas[NMONSTROS][3];
 
 bool animando = false;
+
+Ponto inicio = Ponto(0,0), fim = Ponto(0,0);
 
 
 // **************************************************************
@@ -97,7 +100,7 @@ void init()
     // Define a cor do fundo da tela (AZUL)
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
-    float d = 100;
+    float d = TAM_MAPA;
     Min = Ponto(-d,-d);
     Max = Ponto(d,d);
 
@@ -129,9 +132,9 @@ void animate()
     }
     if (TempoTotal > 5.0)
     {
-        cout << "Tempo Acumulado: "  << TempoTotal << " segundos. " ;
-        cout << "Nros de Frames sem desenho: " << nFrames << endl;
-        cout << "FPS(sem desenho): " << nFrames/TempoTotal << endl;
+//        cout << "Tempo Acumulado: "  << TempoTotal << " segundos. " ;
+//        cout << "Nros de Frames sem desenho: " << nFrames << endl;
+//        cout << "FPS(sem desenho): " << nFrames/TempoTotal << endl;
         TempoTotal = 0;
         nFrames = 0;
     }
@@ -221,7 +224,7 @@ void desenhaMonstro(){
 
 void CriaInstancias()
 {
-    float escala = 2 * Max.x/10.0;
+    float escala = 2 * Max.x/20.0;
     jogador.posicao = Ponto(0,0) ;
     jogador.rotacao = 0;
     jogador.modelo = desenhaDisparador;
@@ -231,23 +234,23 @@ void CriaInstancias()
     Universo[0].rotacao = 0;
     Universo[0].modelo = desenhaMonstro;
     Universo[0].escala = Ponto (2,2,2);
-    Universo[0].escala = Ponto(escala, escala, escala);
+    Universo[0].escala = Ponto( escala/2, escala/2, escala/2);
 
 
     Universo[1].posicao = Ponto (3,0);
     Universo[1].rotacao = 0;
     Universo[1].modelo = desenhaMonstro;
-    Universo[1].escala = Ponto(escala, escala, escala);
+    Universo[1].escala = Ponto( escala/2, escala/2, escala/2);
     
     Universo[2].posicao = Ponto (0,-5);
     Universo[2].rotacao = 0;
     Universo[2].modelo = desenhaMonstro;
-    Universo[2].escala = Ponto(escala, escala, escala);
+    Universo[2].escala = Ponto( escala/2, escala/2, escala/2);
 
     Universo[3].posicao = Ponto (-5,-5);
     Universo[3].rotacao = 0;
     Universo[3].modelo = desenhaMonstro;
-    Universo[3].escala = Ponto(escala, escala, escala);
+    Universo[3].escala = Ponto( escala/2, escala/2, escala/2);
 
 }
 
@@ -272,37 +275,22 @@ void desenhaMonstros(){
 
     }
 }
-void freiaNave(){
-    float freio = 0.1;
-    if( jogador.dir.x > 0){
-        jogador.dir.x -= freio;
-        if( jogador.dir.x < 0 ) jogador.dir.x = 0;
-    }
-
-    if( jogador.dir.x < 0){
-        jogador.dir.x += freio;
-        if( jogador.dir.x > 0 ) jogador.dir.x = 0;
-    }
-
-     if( jogador.dir.y > 0){
-        jogador.dir.y -= freio;
-        if( jogador.dir.y < 0 ) jogador.dir.y = 0;
-    }
-
-    if( jogador.dir.y < 0){
-        jogador.dir.y += freio;
-        if( jogador.dir.y > 0 ) jogador.dir.y = 0;
-    }
-
+void DesenhaLinha(Ponto P1, Ponto P2){
+    glBegin(GL_LINES);
+        glVertex3f(P1.x,P1.y,P1.z);
+        glVertex3f(P2.x,P2.y,P2.z);
+    glEnd();
 }
 void desenhaJogador(){
     Ponto verificaParedes = jogador.posicao + jogador.dir;
+    fim = fim + jogador.dir;
     if( !(verificaParedes.x <= Min.x+10 || verificaParedes.x >= Max.x-10) ){
-        if( !(verificaParedes.y <= Min.y+10 || verificaParedes.y >= Max.y-10) )
+        if( !(verificaParedes.y <= Min.y+10 || verificaParedes.y >= Max.y-10) ){
             jogador.posicao = verificaParedes;
+        }
     }
+    jogador.dir = jogador.dir * 0.97;
 
-    freiaNave();
 
     jogador.desenha();
 }
@@ -324,6 +312,10 @@ void display( void )
 	// Coloque aqui as chamadas das rotinas que desenham os objetos
 	// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+    if(pause){
+        return;
+    }
+
 	glLineWidth(1);
 	glColor3f(1,1,1); // R, G, B  [0..1]
     DesenhaEixos();
@@ -333,8 +325,9 @@ void display( void )
     defineCor(VioletRed);
     desenhaJogador();
 
-    defineCor(MandarinOrange);
-    desenhaMonstros();
+//    defineCor(MandarinOrange);
+//    desenhaMonstros();
+    DesenhaLinha(inicio, fim);
 
 //    andarNaBezier(Universo[3], Curva1);
 //    DesenhaUniverso();
@@ -395,6 +388,13 @@ void keyboard ( unsigned char key, int x, int y )
         case ' ':
             desenha = !desenha;
         break;
+        case 'p':
+            pause = !pause;
+            if(pause)
+                printf("PAUSADO\n");
+            else printf("DESPAUSADO\n");
+            break;
+
 		default:
 			break;
 	}
@@ -408,21 +408,28 @@ void arrow_keys ( int a_keys, int x, int y )
 	switch ( a_keys )
 	{
         case GLUT_KEY_LEFT:
+            if(pause) return;
             jogador.rotacao += 5;
             if(jogador.rotacao >= 180){
                jogador.rotacao = -180; 
             }
-
             break;
+
         case GLUT_KEY_RIGHT:
+            if(pause) return;
             jogador.rotacao -= 5;
             if(jogador.rotacao <= -180){
                jogador.rotacao = 180; 
             }
             break;
+
 		case GLUT_KEY_UP:     
-            andaFrente(jogador);
+            if(pause) return;
+            inicio = jogador.posicao;
+            fim = jogador.posicao;
+            andaFrente(jogador, TAM_MAPA);
 			break;
+
 	    case GLUT_KEY_DOWN:     
 			break;
 		default:
@@ -442,7 +449,7 @@ int  main ( int argc, char** argv )
     glutInitWindowPosition (0,0);
 
     // Define o tamanho inicial da janela grafica do programa
-    glutInitWindowSize  ( 1000, 1000);
+    glutInitWindowSize  ( 500, 500);
 
     // Cria a janela na tela, definindo o nome da
     // que aparecera na barra de t�tulo da janela.
