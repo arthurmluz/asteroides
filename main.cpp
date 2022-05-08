@@ -44,6 +44,7 @@ using namespace std;
 #include "util/bezierFunc.h"
 #include "util/desenhar.h"
 #include "util/util.h"
+#include "util/movimentos.h"
 
 #define NMONSTROS 3
 Temporizador T;
@@ -201,6 +202,7 @@ void DesenhaEixos()
 void desenhaDisparador(){
     glPushMatrix();
         glLineWidth(2);
+        glTranslatef(-0.25, 0, 0);
         disparador.desenhaPoligono();
     glPopMatrix();
 }
@@ -365,18 +367,15 @@ void arrow_keys ( int a_keys, int x, int y )
 	switch ( a_keys )
 	{
         case GLUT_KEY_LEFT:
-            Universo[1].posicao.x -= 0.5;
+            jogador.rotacao += 5;
             break;
         case GLUT_KEY_RIGHT:
-            Universo[1].posicao.x += 0.5;
+            jogador.rotacao -= 5;
             break;
-		case GLUT_KEY_UP:       // Se pressionar UP
-			glutFullScreen ( ); // Vai para Full Screen
+		case GLUT_KEY_UP:       
+           jogador.posicao.y += 1;
 			break;
-	    case GLUT_KEY_DOWN:     // Se pressionar UP
-								// Reposiciona a janela
-            glutPositionWindow (50,50);
-			glutReshapeWindow ( 700, 500 );
+	    case GLUT_KEY_DOWN:     
 			break;
 		default:
 			break;

@@ -23,7 +23,7 @@ public:
     float deltaT = 1.0/50;
     Instancia();
     TipoFuncao *modelo;
-    Ponto posicao, escala;
+    Ponto posicao, escala, dir;
     float rotacao;
     void desenha();
     void setModelo(Poligono *P);

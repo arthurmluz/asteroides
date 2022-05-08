@@ -1,7 +1,7 @@
 # Makefile para Linux e macOS
 
 PROG = main
-FONTES = app/Ponto.cpp app/Poligono.cpp app/Temporizador.cpp app/ListaDeCoresRGB.cpp app/Instancia.cpp util/bezierFunc.cpp util/desenhar.cpp main.cpp 
+FONTES = app/Ponto.cpp app/Poligono.cpp app/Temporizador.cpp app/ListaDeCoresRGB.cpp app/Instancia.cpp util/bezierFunc.cpp util/desenhar.cpp util/movimentos.cpp main.cpp 
 
 OBJETOS = $(FONTES:.cpp=.o)
 CPPFLAGS = -g -O3 -DGL_SILENCE_DEPRECATION # -Wall -g  # Todas as warnings, infos de debug
