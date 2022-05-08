@@ -47,22 +47,25 @@ using namespace std;
 #include "util/movimentos.h"
 
 #define NMONSTROS 3
+#define NTIROS 10
 #define TAM_MAPA 100
 Temporizador T;
 double AccumDeltaT=0;
 
 Instancia Universo[NMONSTROS];
 Instancia jogador;
+Instancia tiros[NTIROS];
 
 // Limites l�gicos da �rea de desenho
 Ponto Min, Max;
 
-bool desenha = false, pause = false;
+bool pause = false;
 
-Poligono monstro, disparador;
-int nInstancias=0;
+Poligono monstro, disparador, tiro;
+int nInstancias=0, atirados = 0;
 
 float angulo=0.0;
+constexpr float escala = 2 * TAM_MAPA/10.0;
 
 void CriaInstancias();
 
@@ -80,6 +83,7 @@ void CarregaModelos()
 {
     monstro.LePoligono("txts/monstro1.txt");
     disparador.LePoligono("txts/disparador.txt");
+    tiro.LePoligono("txts/tiro.txt");
 }
 // **************************************************************
 //
@@ -97,10 +101,12 @@ void CriaCurvas()
 // **************************************************************
 void init()
 {
+    srand(time(NULL));
     // Define a cor do fundo da tela (AZUL)
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
     float d = TAM_MAPA;
+
     Min = Ponto(-d,-d);
     Max = Ponto(d,d);
     printf("Tamanho Mapa: %d.\n", TAM_MAPA);
@@ -196,6 +202,14 @@ void desenhaDisparador(){
     glPopMatrix();
 }
 
+void desenhaTiro(){
+    glPushMatrix();
+        glLineWidth(1);
+        //glTranslatef(-0.25, 0, 0);
+        tiro.desenhaPoligono();
+    glPopMatrix();
+}
+
 void desenhaMonstro(){
     glPushMatrix();
         glLineWidth(2);
@@ -204,42 +218,54 @@ void desenhaMonstro(){
 }
 
 
+
 // ****************************************************************
 // Esta fun��o deve instanciar todos os personagens do cen�rio
 // ****************************************************************
 
 void CriaInstancias()
 {
-    float escala = 2 * Max.x/20.0;
     jogador.posicao = Ponto(0,0) ;
     jogador.rotacao = 0;
     jogador.modelo = desenhaDisparador;
     jogador.escala = Ponto(escala, escala, escala);
-
-    Universo[0].posicao = Ponto (5,5);
-    Universo[0].rotacao = 0;
-    Universo[0].modelo = desenhaMonstro;
-    Universo[0].escala = Ponto (2,2,2);
-    Universo[0].escala = Ponto( escala/2, escala/2, escala/2);
+    jogador.vidas = 3;
 
 
-    Universo[1].posicao = Ponto (3,0);
-    Universo[1].rotacao = 0;
-    Universo[1].modelo = desenhaMonstro;
-    Universo[1].escala = Ponto( escala/2, escala/2, escala/2);
-    
-    Universo[2].posicao = Ponto (0,-5);
-    Universo[2].rotacao = 0;
-    Universo[2].modelo = desenhaMonstro;
-    Universo[2].escala = Ponto( escala/2, escala/2, escala/2);
+    for(int i = 0; i < NTIROS; i++ ){
+        tiros[i].modelo = desenhaTiro;
+        tiros[i].dir.y = 4 * TAM_MAPA/100;
+//        tiros[i].escala = Ponto(escala, escala, escala);
+        tiros[i].escala = Ponto(10, 10, 10);
+    }
 
-    Universo[3].posicao = Ponto (-5,-5);
-    Universo[3].rotacao = 0;
-    Universo[3].modelo = desenhaMonstro;
-    Universo[3].escala = Ponto( escala/2, escala/2, escala/2);
+    for(int i = 0; i < NMONSTROS; i++ ){
+        Universo[i].rotacao = 0;
+        Universo[i].modelo = desenhaMonstro;
+        Universo[i].posicao = pontoAleatorio(Min, Max);
+        Universo[i].escala = Ponto( escala/2, escala/2, escala/2);
+    }
+
 
 }
 
+// ****************************************************************
+void atirar(){
+    if(atirados == 10) return;
+
+    tiros[atirados].posicao = jogador.posicao;
+    tiros[atirados].rotacao = jogador.rotacao;
+
+    float alfa = (tiros[atirados].rotacao * M_PI)/180.0f;
+    float xr = cos(alfa) * 0 + (-sin(alfa) * 2);
+    float yr = sin(alfa) * 0 + cos(alfa) * 2;
+    tiros[atirados].dir = Ponto(xr, yr);
+
+    tiros[atirados].posicao = tiros[atirados].dir*3; 
+
+    atirados++;
+
+}
 
 // ****************************************************************
 void desenhaMonstros(){
@@ -267,6 +293,7 @@ void DesenhaLinha(Ponto P1, Ponto P2){
         glVertex3f(P2.x,P2.y,P2.z);
     glEnd();
 }
+
 void desenhaJogador(){
     Ponto verificaParedes = jogador.posicao + jogador.dir;
     fim = fim + jogador.dir;
@@ -287,8 +314,16 @@ void desenhaJogador(){
         fim = Ponto(0,0);
     }
 
-
     jogador.desenha();
+}
+
+void desenhaTiros(){
+    for(int i = 0; i < atirados; i++){
+        tiros[i].posicao = tiros[i].posicao + tiros[i].dir; 
+        printf("(%f, %f)\n", tiros[i].posicao.x, tiros[i].posicao.y);
+        tiros[i].desenha();
+
+    }
 }
 
 // ****************************************************************
@@ -321,6 +356,8 @@ void display( void )
     defineCor(VioletRed);
     desenhaJogador();
 
+    defineCor(Yellow);
+    desenhaTiros();
 //    defineCor(MandarinOrange);
 //    desenhaMonstros();
 
@@ -376,16 +413,17 @@ void ContaTempo(double tempo)
 void keyboard ( unsigned char key, int x, int y )
 {
 
-	switch ( key )
-	{
-		case 27:        // Termina o programa qdo
-			exit ( 0 );   // a tecla ESC for pressionada
-			break;
+    switch ( key )
+    {
+        case 27:        // Termina o programa qdo
+            exit ( 0 );   // a tecla ESC for pressionada
+            break;
         case 't':
             ContaTempo(3);
             break;
         case ' ':
-            desenha = !desenha;
+            atirar();
+            printf("pew pew \n");
         break;
         case 'p':
             pause = !pause;
@@ -397,7 +435,7 @@ void keyboard ( unsigned char key, int x, int y )
             jogador.posicao = Ponto(0,0);
             jogador.rotacao = 0;
             jogador.dir = Ponto(0,0,0);
-		default:
+        default:
 			break;
 	}
 }

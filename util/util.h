@@ -13,6 +13,7 @@ float RandomFloat(float a, float b) {
 Ponto pontoAleatorio(Ponto min, Ponto max){
     float x = RandomFloat(min.x, max.x);
     float y = RandomFloat(min.y, max.y);
+    if( x == 0 || y == 0) return pontoAleatorio(min, max);
     return Ponto(x, y);
 } 
 
