@@ -48,6 +48,7 @@ Instancia::Instancia()
     rotacao = 0;
     posicao = Ponto(0,0,0);
     escala = Ponto(1,1,1);
+    dir = Ponto(0, 0, 0);
 }
 void Instancia::desenha()
 {

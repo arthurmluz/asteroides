@@ -97,7 +97,7 @@ void init()
     // Define a cor do fundo da tela (AZUL)
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
-    float d = 10;
+    float d = 100;
     Min = Ponto(-d,-d);
     Max = Ponto(d,d);
 
@@ -221,27 +221,33 @@ void desenhaMonstro(){
 
 void CriaInstancias()
 {
+    float escala = 2 * Max.x/10.0;
     jogador.posicao = Ponto(0,0) ;
     jogador.rotacao = 0;
     jogador.modelo = desenhaDisparador;
-    jogador.escala = Ponto(2, 2, 2);
+    jogador.escala = Ponto(escala, escala, escala);
 
     Universo[0].posicao = Ponto (5,5);
     Universo[0].rotacao = 0;
     Universo[0].modelo = desenhaMonstro;
     Universo[0].escala = Ponto (2,2,2);
+    Universo[0].escala = Ponto(escala, escala, escala);
+
 
     Universo[1].posicao = Ponto (3,0);
-    Universo[1].rotacao = -90;
+    Universo[1].rotacao = 0;
     Universo[1].modelo = desenhaMonstro;
+    Universo[1].escala = Ponto(escala, escala, escala);
     
     Universo[2].posicao = Ponto (0,-5);
     Universo[2].rotacao = 0;
     Universo[2].modelo = desenhaMonstro;
+    Universo[2].escala = Ponto(escala, escala, escala);
 
     Universo[3].posicao = Ponto (-5,-5);
     Universo[3].rotacao = 0;
     Universo[3].modelo = desenhaMonstro;
+    Universo[3].escala = Ponto(escala, escala, escala);
 
 }
 
@@ -266,6 +272,41 @@ void desenhaMonstros(){
 
     }
 }
+void freiaNave(){
+    float freio = 0.1;
+    if( jogador.dir.x > 0){
+        jogador.dir.x -= freio;
+        if( jogador.dir.x < 0 ) jogador.dir.x = 0;
+    }
+
+    if( jogador.dir.x < 0){
+        jogador.dir.x += freio;
+        if( jogador.dir.x > 0 ) jogador.dir.x = 0;
+    }
+
+     if( jogador.dir.y > 0){
+        jogador.dir.y -= freio;
+        if( jogador.dir.y < 0 ) jogador.dir.y = 0;
+    }
+
+    if( jogador.dir.y < 0){
+        jogador.dir.y += freio;
+        if( jogador.dir.y > 0 ) jogador.dir.y = 0;
+    }
+
+}
+void desenhaJogador(){
+    Ponto verificaParedes = jogador.posicao + jogador.dir;
+    if( !(verificaParedes.x <= Min.x+10 || verificaParedes.x >= Max.x-10) ){
+        if( !(verificaParedes.y <= Min.y+10 || verificaParedes.y >= Max.y-10) )
+            jogador.posicao = verificaParedes;
+    }
+
+    freiaNave();
+
+    jogador.desenha();
+}
+
 // ****************************************************************
 //  void display( void )
 // ****************************************************************
@@ -290,10 +331,10 @@ void display( void )
     glLineWidth(1);
 
     defineCor(VioletRed);
-    jogador.desenha();
+    desenhaJogador();
 
-//    defineCor(MandarinOrange);
-//    desenhaMonstros();
+    defineCor(MandarinOrange);
+    desenhaMonstros();
 
 //    andarNaBezier(Universo[3], Curva1);
 //    DesenhaUniverso();
@@ -368,12 +409,19 @@ void arrow_keys ( int a_keys, int x, int y )
 	{
         case GLUT_KEY_LEFT:
             jogador.rotacao += 5;
+            if(jogador.rotacao >= 180){
+               jogador.rotacao = -180; 
+            }
+
             break;
         case GLUT_KEY_RIGHT:
             jogador.rotacao -= 5;
+            if(jogador.rotacao <= -180){
+               jogador.rotacao = 180; 
+            }
             break;
-		case GLUT_KEY_UP:       
-           jogador.posicao.y += 1;
+		case GLUT_KEY_UP:     
+            andaFrente(jogador);
 			break;
 	    case GLUT_KEY_DOWN:     
 			break;
@@ -394,7 +442,7 @@ int  main ( int argc, char** argv )
     glutInitWindowPosition (0,0);
 
     // Define o tamanho inicial da janela grafica do programa
-    glutInitWindowSize  ( 650, 500);
+    glutInitWindowSize  ( 1000, 1000);
 
     // Cria a janela na tela, definindo o nome da
     // que aparecera na barra de t�tulo da janela.
