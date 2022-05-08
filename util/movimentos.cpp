@@ -1,16 +1,21 @@
 #include "movimentos.h"
 
-void andaFrente(Instancia &jogador){
-    jogador.dir.y += 4;
+void andaFrente(Instancia &jogador, int tamMapa){
+//    printf("y = %f\n", jogador.dir.y);
+    jogador.dir.y += 4 * tamMapa/100.0;
     float alfa = (jogador.rotacao * M_PI)/180.0f;
-    printf("angulo>: %f\n", alfa);
-    //float xr = cos(alfa) * jogador.dir.x + (-sin(alfa) * jogador.dir.y) ;
-
+    //printf("angulo>: %f\n", alfa);
     float xr = cos(alfa) * 0 + (-sin(alfa) * jogador.dir.y);
     float yr = sin(alfa) * 0 + cos(alfa) * jogador.dir.y;
 //    float xr = jogador.dir.x * cos(alfa) - jogador.dir.y * sin(alfa);
 //    float yr = jogador.dir.x * sin(alfa) - jogador.dir.y * cos(alfa);
-    printf("(%f, %f)\n", xr, yr);
+    if(abs(xr) > tamMapa){
+        xr = tamMapa * (xr/abs(xr));
+    }
+    if(abs(yr) > tamMapa){
+        yr = tamMapa * (yr/abs(yr));
+    }
     jogador.dir = Ponto(xr, yr);
+//    printf("(%f, %f)\n", jogador.dir.x, jogador.dir.y);
 }
 

@@ -47,11 +47,11 @@ using namespace std;
 #include "util/movimentos.h"
 
 #define NMONSTROS 3
-#define TAM_MAPA 10
+#define TAM_MAPA 100
 Temporizador T;
 double AccumDeltaT=0;
 
-Instancia Universo[10];
+Instancia Universo[NMONSTROS];
 Instancia jogador;
 
 // Limites l�gicos da �rea de desenho
@@ -103,6 +103,7 @@ void init()
     float d = TAM_MAPA;
     Min = Ponto(-d,-d);
     Max = Ponto(d,d);
+    printf("Tamanho Mapa: %d.\n", TAM_MAPA);
 
     CarregaModelos();
     CriaCurvas();
@@ -186,21 +187,6 @@ void DesenhaEixos()
 }
 
 // ****************************************************************
-//void DesenhaCatavento()
-//{
-//    glLineWidth(3);
-//    glPushMatrix();
-//        defineCor(BrightGold);
-//        DesenhaMastro(Mastro);
-//        glPushMatrix();
-//            glColor3f(1,0,0); // R, G, B  [0..1]
-//            glTranslated(0,3,0);
-//            glScaled(0.2, 0.2, 1);
-//            defineCor(YellowGreen);
-//            DesenhaHelicesGirando(MeiaSeta, angulo);
-//        glPopMatrix();
-//    glPopMatrix();
-//}
 
 void desenhaDisparador(){
     glPushMatrix();
@@ -284,12 +270,22 @@ void DesenhaLinha(Ponto P1, Ponto P2){
 void desenhaJogador(){
     Ponto verificaParedes = jogador.posicao + jogador.dir;
     fim = fim + jogador.dir;
-    if( !(verificaParedes.x <= Min.x+10 || verificaParedes.x >= Max.x-10) ){
-        if( !(verificaParedes.y <= Min.y+10 || verificaParedes.y >= Max.y-10) ){
+    if( !(verificaParedes.x <= Min.x+(TAM_MAPA/10) || verificaParedes.x >= Max.x-(TAM_MAPA/10)) ){
+        if( !(verificaParedes.y <= Min.y+ (TAM_MAPA/10)|| verificaParedes.y >= Max.y-(TAM_MAPA/10)) ){
             jogador.posicao = verificaParedes;
         }
     }
-    jogador.dir = jogador.dir * 0.97;
+    jogador.dir = jogador.dir * 0.95;
+//    if(abs(jogador.dir.x) * 10 < 1) jogador.dir.x = 0;
+//    if(abs(jogador.dir.y) * 10 < 1) jogador.dir.y = 0;
+    if(abs(jogador.dir.x * TAM_MAPA) > 1 || abs(jogador.dir.y * TAM_MAPA) > 1){
+        inicio = jogador.posicao;
+        fim = jogador.dir + jogador.posicao;
+    }
+    else {
+        inicio = Ponto(0,0);
+        fim = Ponto(0,0);
+    }
 
 
     jogador.desenha();
@@ -327,6 +323,9 @@ void display( void )
 
 //    defineCor(MandarinOrange);
 //    desenhaMonstros();
+
+    glLineWidth(2);
+    defineCor(Red);
     DesenhaLinha(inicio, fim);
 
 //    andarNaBezier(Universo[3], Curva1);
@@ -394,7 +393,10 @@ void keyboard ( unsigned char key, int x, int y )
                 printf("PAUSADO\n");
             else printf("DESPAUSADO\n");
             break;
-
+        case 'r':
+            jogador.posicao = Ponto(0,0);
+            jogador.rotacao = 0;
+            jogador.dir = Ponto(0,0,0);
 		default:
 			break;
 	}
@@ -409,24 +411,27 @@ void arrow_keys ( int a_keys, int x, int y )
 	{
         case GLUT_KEY_LEFT:
             if(pause) return;
-            jogador.rotacao += 5;
-            if(jogador.rotacao >= 180){
-               jogador.rotacao = -180; 
+            jogador.rotacao += 10;
+            if(jogador.rotacao >= 360){
+               jogador.rotacao = 0; 
             }
+
+//            printf("rotac %f\n", jogador.rotacao);
             break;
 
         case GLUT_KEY_RIGHT:
             if(pause) return;
-            jogador.rotacao -= 5;
-            if(jogador.rotacao <= -180){
-               jogador.rotacao = 180; 
+            jogador.rotacao -= 10;
+            if(jogador.rotacao <= 0){
+               jogador.rotacao = 360; 
             }
+//            printf("rotac %f\n", jogador.rotacao);
             break;
 
 		case GLUT_KEY_UP:     
             if(pause) return;
-            inicio = jogador.posicao;
-            fim = jogador.posicao;
+//            inicio = jogador.posicao; esses 2 faz o traçado grande
+//            fim = jogador.posicao;
             andaFrente(jogador, TAM_MAPA);
 			break;
 

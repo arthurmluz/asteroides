@@ -3,6 +3,6 @@
 
 #include "../app/Instancia.h"
 
-void andaFrente(Instancia &jogador);
+void andaFrente(Instancia &jogador, int tamMapa);
 
 #endif
