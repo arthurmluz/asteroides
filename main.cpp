@@ -48,7 +48,7 @@ using namespace std;
 
 #define NMONSTROS 3
 #define NTIROS 20
-#define TAM_MAPA 100 // MIN(TAM_MAPA, TAM_MAPA)  MAX(TAM_MAPA, TAM_MAPA)
+#define TAM_MAPA 1000 // MIN(TAM_MAPA, TAM_MAPA)  MAX(TAM_MAPA, TAM_MAPA)
 #define TAM_JANELA 1000
 
 Temporizador T;
@@ -87,7 +87,7 @@ void CarregaModelos()
     monstro[1].LeObjeto("txts/monstro2.txt");
     monstro[2].LeObjeto("txts/monstro3.txt");
     monstro[3].LeObjeto("txts/monstro4.txt");
-    disparador.LePoligono("txts/disparador.txt");
+    disparador.LeObjeto("txts/nave.txt");
     tiro.LePoligono("txts/tiro.txt");
 }
 // **************************************************************
@@ -204,8 +204,10 @@ void DesenhaEixos()
 void desenhaDisparador(){
     glPushMatrix();
         glLineWidth(2);
-        glTranslatef(-0.25, 0, 0);
-        disparador.desenhaPoligono();
+        glPointSize(6);
+        glTranslatef(-13.5, 0, 0);
+        disparador.desenhaVerticesColoridas();
+        glPointSize(1);
     glPopMatrix();
 }
 
@@ -261,11 +263,15 @@ void desenhaTeste(){
 
 void CriaInstancias()
 {
+
+    Ponto min, max;
+    disparador.obtemLimites(min, max);
     jogador.posicao = Ponto(0,0) ;
     jogador.rotacao = 0;
     jogador.modelo = desenhaDisparador;
-    jogador.escala = Ponto(escala, escala, escala);
-//    jogador.escala = Ponto(TAM_MAPA/100.0, TAM_MAPA/100.0, TAM_MAPA/100.0);
+
+    //jogador.escala = Ponto(escala, escala, escala);
+    jogador.escala = Ponto(TAM_MAPA/(100.0 * (max.x/10)), TAM_MAPA/(100.0 * (max.y/10)), TAM_MAPA/100.0);
     jogador.vidas = 3;
 
     for(int i = 0; i < NMONSTROS; i++ ){
