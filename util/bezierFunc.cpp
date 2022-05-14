@@ -9,6 +9,7 @@ void TracaPontosDeControle(Ponto PC[])
         glVertex3f(PC[1].x, PC[1].y, PC[1].z);
         glVertex3f(PC[2].x, PC[2].y, PC[2].z);
     glEnd();
+    glPointSize(1);
 }
 
 // **************************************************************
@@ -50,7 +51,7 @@ double anguloVetores(Ponto monstro, Ponto jogador){
     delta_x = monstro.x - jogador.x;
     delta_y = jogador.y - monstro.y;
 
-    return atan2(delta_x, delta_y) * 180 / 3.14159265; //descomentar isso me dá a resposta em angulos (debugar)
+    return atan2(delta_x, delta_y) * ang; //descomentar isso me dá a resposta em angulos (debugar)
 }
 // *****************************************************************
 void andarNaBezier(Instancia &andador, Ponto pontosUteis[], Ponto curva[]){

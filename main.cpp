@@ -55,7 +55,7 @@ Temporizador T;
 double AccumDeltaT=0;
 
 Instancia Universo[NMONSTROS];
-Instancia jogador;
+Instancia jogador, teste;
 vector<Instancia> tiros;
 
 // Limites l�gicos da �rea de desenho
@@ -63,7 +63,7 @@ Ponto Min, Max;
 
 bool pause = false;
 
-Poligono monstro, disparador, tiro;
+Poligono monstro[4], disparador, tiro;
 int nInstancias=0, atirados = 0;
 
 float angulo=0.0;
@@ -83,7 +83,8 @@ Ponto inicio = Ponto(0,0), fim = Ponto(0,0);
 // **************************************************************
 void CarregaModelos()
 {
-    monstro.LePoligono("txts/monstro1.txt");
+    monstro[0].LePoligono("txts/monstro1.txt");
+    monstro[1].LeObjeto("txts/monstro2.txt");
     disparador.LePoligono("txts/disparador.txt");
     tiro.LePoligono("txts/tiro.txt");
 }
@@ -104,8 +105,10 @@ void CriaCurvas()
 void init()
 {
     srand(time(NULL));
-    // Define a cor do fundo da tela (AZUL)
-    glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+    // Define a cor do fundo da tela (CINZA)
+  //  glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     float d = TAM_MAPA;
 
@@ -207,6 +210,7 @@ void desenhaDisparador(){
 void desenhaTiro(){
     glPushMatrix();
         glLineWidth(1);
+        defineCor(Yellow);
         //glTranslatef(-0.25, 0, 0);
         tiro.pintaPoligono();
     glPopMatrix();
@@ -215,10 +219,18 @@ void desenhaTiro(){
 void desenhaMonstro(){
     glPushMatrix();
         glLineWidth(2);
-        monstro.desenhaPoligono();
+        monstro[0].desenhaPoligono();
     glPopMatrix();
 }
 
+void desenhaTeste(){
+    glPushMatrix();
+        glPointSize(6);
+        glTranslatef(-1.5, 0,0 );
+        monstro[1].desenhaVerticesColoridas();
+        glPointSize(1);
+    glPopMatrix();
+}
 
 
 // ****************************************************************
@@ -229,18 +241,22 @@ void CriaInstancias()
 {
     jogador.posicao = Ponto(0,0) ;
     jogador.rotacao = 0;
-    jogador.modelo = desenhaDisparador;
-    jogador.escala = Ponto(escala, escala, escala);
+    jogador.modelo = desenhaTeste;
+//    jogador.escala = Ponto(escala, escala, escala);
+    jogador.escala = Ponto(TAM_MAPA/100.0, TAM_MAPA/100.0, TAM_MAPA/100.0);
     jogador.vidas = 3;
 
     for(int i = 0; i < NMONSTROS; i++ ){
         Universo[i].rotacao = 0;
-        Universo[i].modelo = desenhaDisparador;
+        Universo[i].modelo = desenhaTeste;
         Universo[i].posicao = pontoAleatorio(Min, Max);
-        Universo[i].escala = Ponto( escala/2, escala/2, escala/2);
+//        Universo[i].escala = Ponto( escala/2, escala/2, escala/2);
+        Universo[i].escala = Ponto(TAM_MAPA/100.0, TAM_MAPA/100.0, TAM_MAPA/100.0);
     }
 
-
+    teste.posicao = Ponto(0,0);
+    teste.modelo = desenhaTeste;
+    teste.escala = Ponto(TAM_MAPA/100.0, TAM_MAPA/100.0, TAM_MAPA/100.0);
 }
 
 // ****************************************************************
@@ -348,17 +364,22 @@ void display( void )
         return;
     }
 
-	glLineWidth(1);
-	glColor3f(1,1,1); // R, G, B  [0..1]
-    DesenhaEixos();
+    glPushMatrix();
+        glLineWidth(1);
+        glColor3f(1,1,1); // R, G, B  [0..1]
+        DesenhaEixos();
+    glPopMatrix();
     
-    glLineWidth(1);
+
+    glPointSize(TAM_MAPA*10/100.0);
+    teste.desenha();
+    //glPointSize(1);
 
     defineCor(VioletRed);
     desenhaJogador();
 
-    defineCor(Yellow);
     desenhaTiros();
+
     desenhaMonstros();
 
     glLineWidth(2);

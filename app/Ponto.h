@@ -11,12 +11,14 @@
 
 #include <iostream>
 #include <cmath>
+#include "Cor.h"
 using namespace std;
 
 class Ponto {
 
 public:
     float x,y,z;
+    Cor cor;
     Ponto ();
     Ponto(float x, float y, float z=0);
     void set(float x, float y, float z=0);

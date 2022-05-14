@@ -41,11 +41,13 @@ public:
     void insereVertice(Ponto p, int pos);
     void desenhaPoligono();
     void desenhaVertices();
+    void desenhaVerticesColoridas();
     void pintaPoligono();
     void imprime();
     void atualizaLimites();
     void obtemLimites(Ponto &Min, Ponto &Max);
     void LePoligono(const char *nome);
+    void LeObjeto(const char *nome);
     void desenhaAresta(int n);
     void getAresta(int i, Ponto &P1, Ponto &P2);
     void ObtemVerticesLimite(int &Esq, int &Dir, int &Inf, int &Sup);
