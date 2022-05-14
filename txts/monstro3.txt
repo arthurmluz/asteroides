@@ -3,7 +3,7 @@
 1 0 0 0        PRETO
 2 255 0 0      VERMELHO
 3 0 255 0      VERDE
-4 0 0 255      AZUL
+4 0 204 255      AZUL
 
 #OBJETO
 8 8

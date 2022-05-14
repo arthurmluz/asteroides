@@ -20,6 +20,8 @@ public:
     //Poligono *modelo;
     int vidas = 1; // nao consigo deletar sem bugar
     float tAtual;
+    vector<Instancia> tiros;
+    int delay = 0;
     float deltaT = 1.0/50;
     Instancia();
     TipoFuncao *modelo;
