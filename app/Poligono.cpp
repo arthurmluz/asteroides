@@ -65,7 +65,7 @@ void Poligono::desenhaVerticesColoridas()
     glBegin(GL_POINTS);
     for (int i=0; i<Vertices.size(); i++){
         Cor a = Vertices[i].cor;
-        glColor3f(a.r, a.g, a.b);
+        glColor3f(a.r/255.0, a.g/255.0, a.b/255.0);
         glVertex3f(Vertices[i].x,Vertices[i].y,Vertices[i].z);
     }
     glEnd();
@@ -151,7 +151,7 @@ void Poligono::LeObjeto(const char *nome){
 
         // le as cores
         input >> tmp >> cores[i].r >> cores[i].g >> cores[i].b >> a;
-       // cout << "R: " << cores[i].r << " G: " << cores[i].g << " B: " << cores[i].b << endl;
+        //cout << "R: " << cores[i].r << " G: " << cores[i].g << " B: " << cores[i].b << endl;
     }
 
     // linha vazia

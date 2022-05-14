@@ -5,7 +5,7 @@ using namespace std;
 
 class Cor{
 public:
-    int r, g, b;
+    double r, g, b;
     Cor();
 };
 
