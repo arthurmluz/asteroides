@@ -17,6 +17,8 @@
 #include "../app/Ponto.h"
 #include "../app/Instancia.h"
 
+#include <math.h>
+
 void TracaPontosDeControle(Ponto PC[]);
 Ponto CalculaBezier3(Ponto PC[], double t);
 void TracaBezier3Pontos(Ponto curva[]);

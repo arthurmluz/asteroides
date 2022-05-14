@@ -48,7 +48,9 @@ using namespace std;
 
 #define NMONSTROS 3
 #define NTIROS 20
-#define TAM_MAPA 100
+#define TAM_MAPA 100 // MIN(TAM_MAPA, TAM_MAPA)  MAX(TAM_MAPA, TAM_MAPA)
+#define TAM_JANELA 1000
+
 Temporizador T;
 double AccumDeltaT=0;
 
@@ -233,7 +235,7 @@ void CriaInstancias()
 
     for(int i = 0; i < NMONSTROS; i++ ){
         Universo[i].rotacao = 0;
-        Universo[i].modelo = desenhaMonstro;
+        Universo[i].modelo = desenhaDisparador;
         Universo[i].posicao = pontoAleatorio(Min, Max);
         Universo[i].escala = Ponto( escala/2, escala/2, escala/2);
     }
@@ -249,13 +251,13 @@ void atirar(){
     tiros.push_back(Instancia());
     Instancia &novoTiro = tiros.back();
     novoTiro.modelo = desenhaTiro;
-    novoTiro.escala = Ponto(10, 10, 10);
+    novoTiro.escala = Ponto(escala/2, escala/2, escala/2);
 
     novoTiro.rotacao = jogador.rotacao;
     float alfa = (novoTiro.rotacao * M_PI)/180.0f;
     float xr = cos(alfa) * 0 + (-sin(alfa) * 2);
     float yr = sin(alfa) * 0 + cos(alfa) * 2;
-    novoTiro.dir = Ponto(xr, yr);
+    novoTiro.dir = Ponto(xr, yr) * TAM_MAPA/100.0;
 
     novoTiro.posicao = novoTiro.dir*3 + jogador.posicao; 
 
@@ -490,7 +492,7 @@ int  main ( int argc, char** argv )
     glutInitWindowPosition (0,0);
 
     // Define o tamanho inicial da janela grafica do programa
-    glutInitWindowSize  ( 1000, 1000);
+    glutInitWindowSize  ( TAM_JANELA, TAM_JANELA);
 
     // Cria a janela na tela, definindo o nome da
     // que aparecera na barra de t�tulo da janela.
