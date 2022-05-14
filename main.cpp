@@ -83,8 +83,10 @@ Ponto inicio = Ponto(0,0), fim = Ponto(0,0);
 // **************************************************************
 void CarregaModelos()
 {
-    monstro[0].LePoligono("txts/monstro1.txt");
+    monstro[0].LeObjeto("txts/monstro1.txt");
     monstro[1].LeObjeto("txts/monstro2.txt");
+    monstro[2].LeObjeto("txts/monstro3.txt");
+    monstro[3].LeObjeto("txts/monstro4.txt");
     disparador.LePoligono("txts/disparador.txt");
     tiro.LePoligono("txts/tiro.txt");
 }
@@ -218,16 +220,36 @@ void desenhaTiro(){
 
 void desenhaMonstro(){
     glPushMatrix();
-        glLineWidth(2);
-        monstro[0].desenhaPoligono();
+        glPointSize(6);
+        glTranslatef(-5, 0,0 );
+        monstro[0].desenhaVerticesColoridas();
+        glPointSize(1);
+    glPopMatrix();
+}
+
+void desenhaMonstro1(){
+    glPushMatrix();
+        glPointSize(6);
+        glTranslatef(-3.5, 0,0 );
+        monstro[1].desenhaVerticesColoridas();
+        glPointSize(1);
+    glPopMatrix();
+}
+
+void desenhaMonstro2(){
+    glPushMatrix();
+        glPointSize(6);
+        glTranslatef(-3.5, 0,0 );
+        monstro[2].desenhaVerticesColoridas();
+        glPointSize(1);
     glPopMatrix();
 }
 
 void desenhaTeste(){
     glPushMatrix();
         glPointSize(6);
-        glTranslatef(-1.5, 0,0 );
-        monstro[1].desenhaVerticesColoridas();
+        glTranslatef(-5, 0,0 );
+        monstro[3].desenhaVerticesColoridas();
         glPointSize(1);
     glPopMatrix();
 }
@@ -241,15 +263,26 @@ void CriaInstancias()
 {
     jogador.posicao = Ponto(0,0) ;
     jogador.rotacao = 0;
-    jogador.modelo = desenhaTeste;
-//    jogador.escala = Ponto(escala, escala, escala);
-    jogador.escala = Ponto(TAM_MAPA/100.0, TAM_MAPA/100.0, TAM_MAPA/100.0);
+    jogador.modelo = desenhaDisparador;
+    jogador.escala = Ponto(escala, escala, escala);
+//    jogador.escala = Ponto(TAM_MAPA/100.0, TAM_MAPA/100.0, TAM_MAPA/100.0);
     jogador.vidas = 3;
 
     for(int i = 0; i < NMONSTROS; i++ ){
         Universo[i].rotacao = 0;
         Universo[i].modelo = desenhaTeste;
         Universo[i].posicao = pontoAleatorio(Min, Max);
+        switch(i % 3){
+            case 0: 
+                Universo[i].modelo = desenhaMonstro;
+                break;
+            case 1: 
+                Universo[i].modelo = desenhaMonstro1;
+                break;
+            case 2: 
+                Universo[i].modelo = desenhaMonstro2;
+                break;
+        }
 //        Universo[i].escala = Ponto( escala/2, escala/2, escala/2);
         Universo[i].escala = Ponto(TAM_MAPA/100.0, TAM_MAPA/100.0, TAM_MAPA/100.0);
     }
@@ -372,7 +405,7 @@ void display( void )
     
 
     glPointSize(TAM_MAPA*10/100.0);
-    teste.desenha();
+   // teste.desenha();
     //glPointSize(1);
 
     defineCor(VioletRed);
