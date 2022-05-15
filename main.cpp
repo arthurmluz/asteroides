@@ -47,6 +47,7 @@ using namespace std;
 #include "util/movimentos.h"
 
 #define NMONSTROS 4
+#define MODELOS_MONSTROS 4
 #define NTIROS 20
 #define TAM_MAPA 1000 // MIN(TAM_MAPA, TAM_MAPA)  MAX(TAM_MAPA, TAM_MAPA)
 #define TAM_JANELA 1000
@@ -63,7 +64,7 @@ Ponto Min, Max;
 
 bool pause = false;
 
-Poligono monstro[4], disparador, tiro;
+Poligono monstro[MODELOS_MONSTROS], disparador, tiro;
 int nInstancias=0, atirados = 0;
 
 float angulo=0.0;
@@ -199,8 +200,6 @@ void DesenhaEixos()
     glEnd();
 }
 
-// ****************************************************************
-
 void desenhaDisparador(){
     glPushMatrix();
         glLineWidth(2);
@@ -287,7 +286,7 @@ void CriaInstancias()
     for(int i = 0; i < NMONSTROS; i++ ){
         Universo[i].rotacao = 0;
         Universo[i].posicao = pontoAleatorio(Min, Max);
-        switch(i % 4){
+        switch(i % MODELOS_MONSTROS){
             case 0: 
                 Universo[i].modelo = desenhaMonstro;
                 break;
@@ -427,6 +426,20 @@ void animaTiros(){
     }
 }
 
+
+// ****************************************************************
+
+void testaColisao(){
+    Ponto min, max;
+    for(int i = 0; i < NMONSTROS; i++){
+        Universo[i].posicao.imprime();
+        monstro[i%MODELOS_MONSTROS].obtemLimites(min, max);
+        double meiaLarg = max.x - min.x;
+        double meiaAltura = max.y - min.y;
+
+        return;
+    }
+}
 // ****************************************************************
 //  void display( void )
 // ****************************************************************
@@ -464,6 +477,8 @@ void display( void )
     animaTiros();
 
     animaMonstros();
+
+    //testaColisao();
 
     glLineWidth(2);
     defineCor(Red);
