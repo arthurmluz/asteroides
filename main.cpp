@@ -46,7 +46,8 @@ using namespace std;
 #include "util/util.h"
 #include "util/movimentos.h"
 
-#define NMONSTROS 10
+#define NMONSTROS 4
+#define NVIDAS 3
 #define MODELOS_MONSTROS 4
 #define NTIROS 10
 #define TAM_MAPA 100 // MIN(TAM_MAPA, TAM_MAPA)  MAX(TAM_MAPA, TAM_MAPA)
@@ -270,7 +271,7 @@ void CriaInstancias()
 
     //jogador.escala = Ponto(escala, escala, escala);
     jogador.escala = Ponto(TAM_MAPA/(100.0 * (max.x/10)), TAM_MAPA/(100.0 * (max.y/10)), TAM_MAPA/100.0);
-    jogador.vidas = 3;
+    jogador.vidas = NVIDAS;
 
     for(int i = 0; i < NMONSTROS; i++ ){
         Universo[i].rotacao = 0;
@@ -497,7 +498,7 @@ void display( void )
     animaMonstros();
 
     testaColisao();
-    if(jogador.vidas == 0) pause = true;
+    if(jogador.vidas <= 0) pause = true;
 
     desenhaVidas();
 
@@ -560,7 +561,7 @@ void keyboard ( unsigned char key, int x, int y )
             jogador.rotacao = 0;
             jogador.dir = Ponto(0,0,0);
             atirados = 0;
-            jogador.vidas = 3;
+            jogador.vidas = NVIDAS;
             pause = false;
             break;
         case 'm':
