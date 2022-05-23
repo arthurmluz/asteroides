@@ -13,7 +13,7 @@
 using namespace std;
 
 #include "Poligono.h"
-typedef void TipoFuncao();
+typedef void TipoFuncao(int num);
 
 class Instancia{
 public:
@@ -28,8 +28,7 @@ public:
     TipoFuncao *modelo;
     Ponto posicao, escala, dir;
     float rotacao;
-    void desenha();
-    void setModelo(Poligono *P);
+    void desenha(int num);
 };
 
 

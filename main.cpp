@@ -46,7 +46,7 @@ using namespace std;
 #include "util/util.h"
 #include "util/movimentos.h"
 
-#define NMONSTROS 1
+#define NMONSTROS 10
 #define MODELOS_MONSTROS 4
 #define NTIROS 10
 #define TAM_MAPA 100 // MIN(TAM_MAPA, TAM_MAPA)  MAX(TAM_MAPA, TAM_MAPA)
@@ -200,7 +200,7 @@ void DesenhaEixos()
     glEnd();
 }
 
-void desenhaDisparador(){
+void desenhaDisparador(int num){
     Ponto a, b;
     disparador.obtemLimites(a, b);
     glPushMatrix();
@@ -211,68 +211,26 @@ void desenhaDisparador(){
     glPopMatrix();
 }
 
-void desenhaTiro(){
+void desenhaTiro(int num){
     glPushMatrix();
         glLineWidth(1);
-        defineCor(Yellow);
+        if(num == 0)
+            defineCor(Yellow);
+        else
+            defineCor(Red);
         //glTranslatef(-0.25, 0, 0);
         tiro.pintaPoligono();
     glPopMatrix();
 }
 
-void desenhaTiroMonstro(){
-    glPushMatrix();
-        glLineWidth(1);
-        defineCor(Red);
-        //glTranslatef(-0.25, 0, 0);
-        tiro.pintaPoligono();
-    glPopMatrix();
-}
-
-void desenhaMonstro(){
+void desenhaMonstro(int num){
     Ponto a, b;
-    monstro[0].obtemLimites(a, b);
+    monstro[num%MODELOS_MONSTROS].obtemLimites(a, b);
     glPushMatrix();
         glPointSize(MONSTER_POINT_SCALE);
         //glTranslatef(-5, 0,0 );
         glTranslatef(-(b.x/2), -(b.y/2), 0);
-        monstro[0].desenhaVerticesColoridas();
-        glPointSize(1);
-    glPopMatrix();
-}
-
-void desenhaMonstro1(){
-    Ponto a, b;
-    monstro[1].obtemLimites(a, b);
-    glPushMatrix();
-        glPointSize(MONSTER_POINT_SCALE);
-        //glTranslatef(-3.5, 0,0 );
-        glTranslatef(-(b.x/2), -(b.y/2), 0);
-        monstro[1].desenhaVerticesColoridas();
-        glPointSize(1);
-    glPopMatrix();
-}
-
-void desenhaMonstro2(){
-    Ponto a, b;
-    monstro[2].obtemLimites(a, b);
-    glPushMatrix();
-        glPointSize(MONSTER_POINT_SCALE);
-        //glTranslatef(-3.5, 0,0 );
-        glTranslatef(-(b.x/2), -(b.y/2), 0);
-        monstro[2].desenhaVerticesColoridas();
-        glPointSize(1);
-    glPopMatrix();
-}
-
-void desenhaMonstro3(){
-    Ponto a, b;
-    monstro[3].obtemLimites(a, b);
-    glPushMatrix();
-        glPointSize(MONSTER_POINT_SCALE);
-        //glTranslatef(-3.5, 0,0 );
-        glTranslatef(-(b.x/2), -(b.y/2), 0);
-        monstro[3].desenhaVerticesColoridas();
+        monstro[num%MODELOS_MONSTROS].desenhaVerticesColoridas();
         glPointSize(1);
     glPopMatrix();
 }
@@ -317,21 +275,9 @@ void CriaInstancias()
     for(int i = 0; i < NMONSTROS; i++ ){
         Universo[i].rotacao = 0;
         Universo[i].posicao = pontoAleatorio(Min, Max);
-        switch(i % MODELOS_MONSTROS){
-            case 0: 
-                Universo[i].modelo = desenhaMonstro;
-                break;
-            case 1: 
-                Universo[i].modelo = desenhaMonstro1;
-                break;
-            case 2: 
-                Universo[i].modelo = desenhaMonstro2;
-                break;
-            case 3: 
-                Universo[i].modelo = desenhaMonstro3;
-                break;
 
-        }
+        Universo[i].modelo = desenhaMonstro;
+
         Ponto min, max;
         monstro[i%MODELOS_MONSTROS].obtemLimites(min, max);
         if( max.x > max.y ) 
@@ -376,7 +322,7 @@ void atirarMonstro(Instancia &atirador){
     }
     atirador.tiros.push_back(Instancia());
     Instancia &novoTiro = atirador.tiros.back();
-    novoTiro.modelo = desenhaTiroMonstro;
+    novoTiro.modelo = desenhaTiro;
     novoTiro.escala = Ponto(escala/2, escala/2, escala/2);
 
     novoTiro.rotacao = atirador.rotacao;
@@ -404,7 +350,7 @@ void animaMonstros(){
 
         defineCor(MandarinOrange);
         andarNaBezier(Universo[i], pontosUteis, curvas[i]);
-        Universo[i].desenha();
+        Universo[i].desenha(i);
 
         if(debug){
             defineCor(NavyBlue);
@@ -435,7 +381,7 @@ void animaJogador(){
     jogador.dir = jogador.dir * 0.95;
 //    if(abs(jogador.dir.x) * 10 < 1) jogador.dir.x = 0;
 //    if(abs(jogador.dir.y) * 10 < 1) jogador.dir.y = 0;
-    jogador.desenha();
+    jogador.desenha(0);
 }
 
 void animaTiros(){
@@ -443,7 +389,7 @@ void animaTiros(){
         it.posicao = it.posicao + it.dir;
 
         if(it.vidas > 0)
-            it.desenha();
+            it.desenha(0);
         if( it.posicao.x > Max.x || it.posicao.x < Min.x || it.posicao.y > Max.x || it.posicao.y < Min.y ){
             atirados--;
             jogador.tiros.erase(jogador.tiros.begin());
@@ -453,7 +399,7 @@ void animaTiros(){
         for(Instancia &it: Universo[i].tiros){
             it.posicao = it.posicao + it.dir;
             if(it.vidas > 0)
-                it.desenha();
+                it.desenha(1);
             if( it.posicao.x > Max.x || it.posicao.x < Min.x || it.posicao.y > Max.x || it.posicao.y < Min.y ){
                 Universo[i].tiros.erase(Universo[i].tiros.begin());
             }
@@ -477,6 +423,7 @@ void DrawCircle(Ponto C, float r, int num_segments) {
 
 void testaColisao(){
     for(int i = 0; i < NMONSTROS; i++){
+        // colisão tiros do monstro contra usuário
         for(Instancia &tiro: Universo[i].tiros){
             if(tiro.vidas <= 0) continue;
             float dist = sqrt(pow(tiro.posicao.x - jogador.posicao.x, 2) + pow(tiro.posicao.y - jogador.posicao.y, 2)); 
@@ -495,6 +442,14 @@ void testaColisao(){
             DrawCircle(jogador.posicao, jogador.raio, 30);
         }
 
+
+        float dist = sqrt(pow(jogador.posicao.x - Universo[i].posicao.x, 2) + pow(jogador.posicao.y - Universo[i].posicao.y, 2)); 
+        if( dist < jogador.raio + Universo[i].raio ){
+            jogador.vidas--;
+            Universo[i].vidas--;
+        }
+
+        // colisão tiros do jogador contra monstros
         for(Instancia &tiro: jogador.tiros){
             if(tiro.vidas <= 0) continue;
             float dist = sqrt(pow(tiro.posicao.x - Universo[i].posicao.x, 2) + pow(tiro.posicao.y - Universo[i].posicao.y, 2)); 
@@ -542,6 +497,7 @@ void display( void )
     animaMonstros();
 
     testaColisao();
+    if(jogador.vidas == 0) pause = true;
 
     desenhaVidas();
 
@@ -605,6 +561,7 @@ void keyboard ( unsigned char key, int x, int y )
             jogador.dir = Ponto(0,0,0);
             atirados = 0;
             jogador.vidas = 3;
+            pause = false;
             break;
         case 'm':
             for(int i = 0; i < NMONSTROS; i++){
