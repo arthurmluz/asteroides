@@ -132,6 +132,17 @@ Ponto operator+(Ponto P1, Ponto P2)
     return temp;
 }
 
+Ponto operator+(Ponto P1, float k)
+{
+    Ponto temp;
+    temp = P1;
+    temp.x += k;
+    temp.y += k;
+    temp.z += k;
+    return temp;
+}
+
+
 Ponto operator- (Ponto P1, Ponto P2)
 {
     Ponto temp;

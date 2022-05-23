@@ -46,39 +46,40 @@ using namespace std;
 #include "util/util.h"
 #include "util/movimentos.h"
 
-#define NMONSTROS 4
+#define NMONSTROS 1
 #define MODELOS_MONSTROS 4
-#define NTIROS 20
-#define TAM_MAPA 1000 // MIN(TAM_MAPA, TAM_MAPA)  MAX(TAM_MAPA, TAM_MAPA)
-#define TAM_JANELA 1000
+#define NTIROS 10
+#define TAM_MAPA 100 // MIN(TAM_MAPA, TAM_MAPA)  MAX(TAM_MAPA, TAM_MAPA)
+#define TAM_JANELA 800
 
+#define MONSTER_POINT_SCALE 6
 Temporizador T;
 double AccumDeltaT=0;
 
+//Instancias
 Instancia Universo[NMONSTROS];
 Instancia jogador, teste;
 
+// Curvas
+Ponto curvas[NMONSTROS][3];
+
+// Modelo dos personagens
+Poligono monstro[MODELOS_MONSTROS], disparador, tiro;
 
 // Limites l�gicos da �rea de desenho
 Ponto Min, Max;
 
-bool pause = false;
+// pausar (P) e debug (D)
+bool pause = false, debug = true;
 
-Poligono monstro[MODELOS_MONSTROS], disparador, tiro;
-int nInstancias=0, atirados = 0;
-
-float angulo=0.0;
+// tiros do jogador
+int atirados = 0;
+// escala do jogador e outras coisas
 constexpr float escala = 2 * TAM_MAPA/10.0;
-
-void CriaInstancias();
-
-Ponto curvas[NMONSTROS][3];
 
 bool animando = false;
 
-Ponto inicio = Ponto(0,0), fim = Ponto(0,0);
-
-
+void CriaInstancias();
 // **************************************************************
 //
 // **************************************************************
@@ -142,7 +143,6 @@ void animate()
     if (AccumDeltaT > 1.0/30) // fixa a atualiza��o da tela em 30
     {
         AccumDeltaT = 0;
-        angulo+=2;
         glutPostRedisplay();
     }
     if (TempoTotal > 5.0)
@@ -201,10 +201,11 @@ void DesenhaEixos()
 }
 
 void desenhaDisparador(){
+    Ponto a, b;
+    disparador.obtemLimites(a, b);
     glPushMatrix();
-        glLineWidth(2);
-        glPointSize(6);
-        glTranslatef(-13.5, 0, 0);
+        glPointSize(3);
+        glTranslatef(-(b.x/2), -(b.y/2), 0);
         disparador.desenhaVerticesColoridas();
         glPointSize(1);
     glPopMatrix();
@@ -228,44 +229,69 @@ void desenhaTiroMonstro(){
     glPopMatrix();
 }
 
-
 void desenhaMonstro(){
+    Ponto a, b;
+    monstro[0].obtemLimites(a, b);
     glPushMatrix();
-        glPointSize(6);
-        glTranslatef(-5, 0,0 );
+        glPointSize(MONSTER_POINT_SCALE);
+        //glTranslatef(-5, 0,0 );
+        glTranslatef(-(b.x/2), -(b.y/2), 0);
         monstro[0].desenhaVerticesColoridas();
         glPointSize(1);
     glPopMatrix();
 }
 
 void desenhaMonstro1(){
+    Ponto a, b;
+    monstro[1].obtemLimites(a, b);
     glPushMatrix();
-        glPointSize(6);
-        glTranslatef(-3.5, 0,0 );
+        glPointSize(MONSTER_POINT_SCALE);
+        //glTranslatef(-3.5, 0,0 );
+        glTranslatef(-(b.x/2), -(b.y/2), 0);
         monstro[1].desenhaVerticesColoridas();
         glPointSize(1);
     glPopMatrix();
 }
 
 void desenhaMonstro2(){
+    Ponto a, b;
+    monstro[2].obtemLimites(a, b);
     glPushMatrix();
-        glPointSize(6);
-        glTranslatef(-3.5, 0,0 );
+        glPointSize(MONSTER_POINT_SCALE);
+        //glTranslatef(-3.5, 0,0 );
+        glTranslatef(-(b.x/2), -(b.y/2), 0);
         monstro[2].desenhaVerticesColoridas();
         glPointSize(1);
     glPopMatrix();
 }
 
 void desenhaMonstro3(){
+    Ponto a, b;
+    monstro[3].obtemLimites(a, b);
     glPushMatrix();
-        glPointSize(6);
-        glTranslatef(-3.5, 0,0 );
+        glPointSize(MONSTER_POINT_SCALE);
+        //glTranslatef(-3.5, 0,0 );
+        glTranslatef(-(b.x/2), -(b.y/2), 0);
         monstro[3].desenhaVerticesColoridas();
         glPointSize(1);
     glPopMatrix();
 }
 
+void desenhaVidas(){
+    float xTopo = Min.x, yTopo = Max.y;
+    constexpr float deslocX = (3* TAM_MAPA/100), deslocY = (12.2 * TAM_MAPA/100);
 
+    for(int i = 0; i < jogador.vidas; i++){
+        glPushMatrix();
+            glPointSize(3);
+            glTranslatef(xTopo+deslocX+(2*i*jogador.raio), yTopo-deslocY, 0);
+            glScalef(jogador.escala.x, jogador.escala.y, jogador.escala.z);
+            disparador.desenhaVerticesColoridas();
+            glPointSize(1);
+        glPopMatrix();
+    }
+
+}
 // ****************************************************************
 // Esta fun��o deve instanciar todos os personagens do cen�rio
 // ****************************************************************
@@ -278,6 +304,11 @@ void CriaInstancias()
     jogador.posicao = Ponto(0,0) ;
     jogador.rotacao = 0;
     jogador.modelo = desenhaDisparador;
+
+    if( max.x > max.y ) 
+        jogador.raio = (max.x/5) * TAM_MAPA/100; 
+    else
+        jogador.raio = (max.y/5) * TAM_MAPA/100;  
 
     //jogador.escala = Ponto(escala, escala, escala);
     jogador.escala = Ponto(TAM_MAPA/(100.0 * (max.x/10)), TAM_MAPA/(100.0 * (max.y/10)), TAM_MAPA/100.0);
@@ -301,6 +332,13 @@ void CriaInstancias()
                 break;
 
         }
+        Ponto min, max;
+        monstro[i%MODELOS_MONSTROS].obtemLimites(min, max);
+        if( max.x > max.y ) 
+            Universo[i].raio = (1.5+max.x/2) * TAM_MAPA/100; 
+        else
+            Universo[i].raio = (1.5+max.y/2) * TAM_MAPA/100; 
+
 //        Universo[i].escala = Ponto( escala/2, escala/2, escala/2);
         Universo[i].escala = Ponto(TAM_MAPA/100.0, TAM_MAPA/100.0, TAM_MAPA/100.0);
     }
@@ -361,15 +399,19 @@ void animaMonstros(){
 
     for(int i=0; i<NMONSTROS;i++)
     {
+        if( Universo[i].vidas <= 0 ) continue;
         pontosUteis[1] = pontoAleatorio(Min, Max);
 
         defineCor(MandarinOrange);
         andarNaBezier(Universo[i], pontosUteis, curvas[i]);
         Universo[i].desenha();
-           // defineCor(NavyBlue);
-           // TracaBezier3Pontos(curvas[i]);
-           // defineCor(Pink);
-           // TracaPontosDeControle(curvas[i]);
+
+        if(debug){
+            defineCor(NavyBlue);
+            TracaBezier3Pontos(curvas[i]);
+            defineCor(Pink);
+            TracaPontosDeControle(curvas[i]);
+        }
 
         if( rand() % 20 == 0) atirarMonstro(Universo[i]);
 
@@ -385,7 +427,6 @@ void DesenhaLinha(Ponto P1, Ponto P2){
 
 void animaJogador(){
     Ponto verificaParedes = jogador.posicao + jogador.dir;
-    fim = fim + jogador.dir;
     if( !(verificaParedes.x <= Min.x+(TAM_MAPA/10) || verificaParedes.x >= Max.x-(TAM_MAPA/10)) ){
         if( !(verificaParedes.y <= Min.y+ (TAM_MAPA/10)|| verificaParedes.y >= Max.y-(TAM_MAPA/10)) ){
             jogador.posicao = verificaParedes;
@@ -394,22 +435,15 @@ void animaJogador(){
     jogador.dir = jogador.dir * 0.95;
 //    if(abs(jogador.dir.x) * 10 < 1) jogador.dir.x = 0;
 //    if(abs(jogador.dir.y) * 10 < 1) jogador.dir.y = 0;
-    if(abs(jogador.dir.x * TAM_MAPA) > 1 || abs(jogador.dir.y * TAM_MAPA) > 1){
-        inicio = jogador.posicao;
-        fim = jogador.dir + jogador.posicao;
-    }
-    else {
-        inicio = Ponto(0,0);
-        fim = Ponto(0,0);
-    }
-
     jogador.desenha();
 }
 
 void animaTiros(){
     for(Instancia &it: jogador.tiros){
         it.posicao = it.posicao + it.dir;
-        it.desenha();
+
+        if(it.vidas > 0)
+            it.desenha();
         if( it.posicao.x > Max.x || it.posicao.x < Min.x || it.posicao.y > Max.x || it.posicao.y < Min.y ){
             atirados--;
             jogador.tiros.erase(jogador.tiros.begin());
@@ -418,7 +452,8 @@ void animaTiros(){
     for(int i = 0; i < NMONSTROS; i++){
         for(Instancia &it: Universo[i].tiros){
             it.posicao = it.posicao + it.dir;
-            it.desenha();
+            if(it.vidas > 0)
+                it.desenha();
             if( it.posicao.x > Max.x || it.posicao.x < Min.x || it.posicao.y > Max.x || it.posicao.y < Min.y ){
                 Universo[i].tiros.erase(Universo[i].tiros.begin());
             }
@@ -427,17 +462,48 @@ void animaTiros(){
 }
 
 
+void DrawCircle(Ponto C, float r, int num_segments) {
+    glBegin(GL_LINE_LOOP);
+    for (int ii = 0; ii < num_segments; ii++)   {
+        float theta = 2.0f * 3.1415926f * float(ii) / float(num_segments);//get the current angle 
+        float x = r * cosf(theta);//calculate the x component 
+        float y = r * sinf(theta);//calculate the y component 
+        glVertex2f(x + C.x, y + C.y);//output vertex 
+    }
+    glEnd();
+}
+
 // ****************************************************************
 
 void testaColisao(){
-    Ponto min, max;
     for(int i = 0; i < NMONSTROS; i++){
-        Universo[i].posicao.imprime();
-        monstro[i%MODELOS_MONSTROS].obtemLimites(min, max);
-        double meiaLarg = max.x - min.x;
-        double meiaAltura = max.y - min.y;
+        for(Instancia &tiro: Universo[i].tiros){
+            if(tiro.vidas <= 0) continue;
+            float dist = sqrt(pow(tiro.posicao.x - jogador.posicao.x, 2) + pow(tiro.posicao.y - jogador.posicao.y, 2)); 
+            if(dist < jogador.raio){
+                jogador.vidas--;
+                tiro.vidas = 0;
+            }
+        }
 
-        return;
+        if( Universo[i].vidas <= 0 ) continue;
+
+        if(debug){
+            glLineWidth(1);
+            glColor3f(1,1,1); // R, G, B  [0..1]
+            DrawCircle(Universo[i].posicao, Universo[i].raio, 30);
+            DrawCircle(jogador.posicao, jogador.raio, 30);
+        }
+
+        for(Instancia &tiro: jogador.tiros){
+            if(tiro.vidas <= 0) continue;
+            float dist = sqrt(pow(tiro.posicao.x - Universo[i].posicao.x, 2) + pow(tiro.posicao.y - Universo[i].posicao.y, 2)); 
+            if(dist < Universo[i].raio){
+                Universo[i].vidas--;
+                tiro.vidas = 0;
+            }
+        }
+
     }
 }
 // ****************************************************************
@@ -461,16 +527,13 @@ void display( void )
         return;
     }
 
-    glPushMatrix();
+    if(debug){
         glLineWidth(1);
         glColor3f(1,1,1); // R, G, B  [0..1]
         DesenhaEixos();
-    glPopMatrix();
+    }
     
-
-    glPointSize(TAM_MAPA*10/100.0);
-   // teste.desenha();
-    //glPointSize(1);
+    //glPointSize(TAM_MAPA*10/100.0);
 
     animaJogador();
 
@@ -478,20 +541,10 @@ void display( void )
 
     animaMonstros();
 
-    //testaColisao();
+    testaColisao();
 
-    glLineWidth(2);
-    defineCor(Red);
-    // foguinho atrás do personagem
-    DesenhaLinha(inicio, fim);
+    desenhaVidas();
 
-//    andarNaBezier(Universo[3], Curva1);
-//    DesenhaUniverso();
-//    defineCor(VioletRed);
-//    TracaBezier3Pontos(Curva1);
-//    defineCor(MandarinOrange);
-//    TracaPontosDeControle(Curva1);
-    
     double dt;
     dt = T.getDeltaT();
     
@@ -551,6 +604,16 @@ void keyboard ( unsigned char key, int x, int y )
             jogador.rotacao = 0;
             jogador.dir = Ponto(0,0,0);
             atirados = 0;
+            jogador.vidas = 3;
+            break;
+        case 'm':
+            for(int i = 0; i < NMONSTROS; i++){
+                Universo[i].vidas = 1;
+            }
+            break;
+        case 'd':
+            debug = !debug;
+            break;
         default:
 			break;
 	}

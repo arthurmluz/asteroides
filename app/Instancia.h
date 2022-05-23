@@ -19,6 +19,7 @@ class Instancia{
 public:
     //Poligono *modelo;
     int vidas = 1; // nao consigo deletar sem bugar
+    float raio;
     float tAtual;
     vector<Instancia> tiros;
     int delay = 0;
