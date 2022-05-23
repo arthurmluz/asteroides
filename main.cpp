@@ -65,7 +65,7 @@ Instancia jogador, teste;
 Ponto curvas[NMONSTROS][3];
 
 // Modelo dos personagens
-Poligono monstro[MODELOS_MONSTROS], disparador, tiro;
+Poligono monstro[MODELOS_MONSTROS], disparador, tiro, derrota, vitoria;
 
 // Limites l�gicos da �rea de desenho
 Ponto Min, Max;
@@ -77,6 +77,8 @@ bool pause = false, debug = true;
 int atirados = 0;
 // escala do jogador e outras coisas
 constexpr float escala = 2 * TAM_MAPA/10.0;
+
+int monstrosVivos = NMONSTROS;
 
 bool animando = false;
 
@@ -92,6 +94,8 @@ void CarregaModelos()
     monstro[3].LeObjeto("txts/monstro4.txt");
     disparador.LeObjeto("txts/nave.txt");
     tiro.LePoligono("txts/tiro.txt");
+    derrota.LeObjeto("txts/derrota.txt");
+    vitoria.LeObjeto("txts/vitoria.txt");
 }
 // **************************************************************
 //
@@ -251,6 +255,27 @@ void desenhaVidas(){
     }
 
 }
+
+void desenhaDerrota(){
+    glPushMatrix();
+        glPointSize(8);
+        glScalef(2, 2, 2);
+        glTranslatef(-18, 0, 0);
+        derrota.desenhaVerticesColoridas();
+        glPointSize(1);
+    glPopMatrix();
+}
+
+void desenhaVitoria(){
+    glPushMatrix();
+        glPointSize(8);
+        glScalef(2, 2, 2);
+        glTranslatef(-18, 0, 0);
+        vitoria.desenhaVerticesColoridas();
+        glPointSize(1);
+    glPopMatrix();
+}
+
 // ****************************************************************
 // Esta fun��o deve instanciar todos os personagens do cen�rio
 // ****************************************************************
@@ -290,9 +315,6 @@ void CriaInstancias()
         Universo[i].escala = Ponto(TAM_MAPA/100.0, TAM_MAPA/100.0, TAM_MAPA/100.0);
     }
 
-    //teste.posicao = Ponto(0,0);
-    //teste.modelo = desenhaTeste;
-    //teste.escala = Ponto(TAM_MAPA/100.0, TAM_MAPA/100.0, TAM_MAPA/100.0);
 }
 
 // ****************************************************************
@@ -448,6 +470,7 @@ void testaColisao(){
         if( dist < jogador.raio + Universo[i].raio ){
             jogador.vidas--;
             Universo[i].vidas--;
+            monstrosVivos--;
         }
 
         // colisão tiros do jogador contra monstros
@@ -457,6 +480,7 @@ void testaColisao(){
             if(dist < Universo[i].raio){
                 Universo[i].vidas--;
                 tiro.vidas = 0;
+                monstrosVivos--;
             }
         }
 
@@ -498,7 +522,15 @@ void display( void )
     animaMonstros();
 
     testaColisao();
-    if(jogador.vidas <= 0) pause = true;
+    if(jogador.vidas <= 0){
+        pause = true;
+        desenhaDerrota();
+    }
+
+    if(monstrosVivos == 0){
+        pause = true;
+        desenhaVitoria();
+    }
 
     desenhaVidas();
 
@@ -565,6 +597,7 @@ void keyboard ( unsigned char key, int x, int y )
             pause = false;
             break;
         case 'm':
+            monstrosVivos = NMONSTROS;
             for(int i = 0; i < NMONSTROS; i++){
                 Universo[i].vidas = 1;
             }
