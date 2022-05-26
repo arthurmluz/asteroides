@@ -60,15 +60,27 @@ void Poligono::desenhaVertices()
     glEnd();
 }
 
+void DesenhaRetangulo(Ponto pnt)
+{
+    glBegin(GL_QUADS);
+        glVertex2d(pnt.x-1, pnt.y-1);
+        glVertex2d(pnt.x-1, pnt.y+1);
+        glVertex2d(pnt.x+1, pnt.y+1);
+        glVertex2d(pnt.x+1, pnt.y-1);
+    glEnd();
+}
+
 void Poligono::desenhaVerticesColoridas()
 {
-    glBegin(GL_POINTS);
+//    glBegin(GL_POINTS);
     for (int i=0; i<Vertices.size(); i++){
         Cor a = Vertices[i].cor;
         glColor3f(a.r/255.0, a.g/255.0, a.b/255.0);
-        glVertex3f(Vertices[i].x,Vertices[i].y,Vertices[i].z);
+        DesenhaRetangulo(Vertices[i]);
+        //glVertex3f(Vertices[i].x,Vertices[i].y,Vertices[i].z);
+
     }
-    glEnd();
+ //   glEnd();
 }
 
 void Poligono::imprime()

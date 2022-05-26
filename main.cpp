@@ -46,8 +46,8 @@ using namespace std;
 #include "util/util.h"
 #include "util/movimentos.h"
 
-#define NMONSTROS 4
-#define NVIDAS 3
+#define NMONSTROS 4 
+#define NVIDAS 3 
 #define MODELOS_MONSTROS 4
 #define NTIROS 10
 #define TAM_MAPA 100 // MIN(TAM_MAPA, TAM_MAPA)  MAX(TAM_MAPA, TAM_MAPA)
@@ -209,7 +209,7 @@ void desenhaDisparador(int num){
     Ponto a, b;
     disparador.obtemLimites(a, b);
     glPushMatrix();
-        glPointSize(3);
+        glPointSize(1);
         glTranslatef(-(b.x/2), -(b.y/2), 0);
         disparador.desenhaVerticesColoridas();
         glPointSize(1);
@@ -294,7 +294,7 @@ void CriaInstancias()
     else
         jogador.raio = (max.y/5) * TAM_MAPA/100;  
 
-    //jogador.escala = Ponto(escala, escala, escala);
+    //jogador.escala = Ponto(escala/20, escala/20, escala/20);
     jogador.escala = Ponto(TAM_MAPA/(100.0 * (max.x/10)), TAM_MAPA/(100.0 * (max.y/10)), TAM_MAPA/100.0);
     jogador.vidas = NVIDAS;
 
@@ -527,7 +527,7 @@ void display( void )
         desenhaDerrota();
     }
 
-    if(monstrosVivos == 0){
+    if(monstrosVivos == 0 && NMONSTROS != 0 ){
         pause = true;
         desenhaVitoria();
     }
