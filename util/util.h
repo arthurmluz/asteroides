@@ -17,4 +17,28 @@ Ponto pontoAleatorio(Ponto min, Ponto max){
     return Ponto(x, y);
 } 
 
+Ponto pontoAleatorioMonstro(Ponto min, Ponto max, int n, int NMONSTRO){
+    float x, y;
+
+    switch( n % NMONSTRO ){
+        case 0:
+           x = RandomFloat(min.x, max.x);
+           y = RandomFloat(max.y, max.y+50);
+           break;
+        case 1:
+           x = RandomFloat(min.x, min.x-50);
+           y = RandomFloat(min.y, max.y);
+           break; 
+        case 2:
+           x = RandomFloat(min.x, max.x);
+           y = RandomFloat(min.y, min.y-50);
+        default:
+           x = RandomFloat(max.x, max.x+50);
+           y = RandomFloat(min.y, max.y);
+    }
+    if( x == 0 || y == 0) return pontoAleatorio(min, max);
+    return Ponto(x, y);
+} 
+
+
 #endif

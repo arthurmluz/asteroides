@@ -300,7 +300,7 @@ void CriaInstancias()
 
     for(int i = 0; i < NMONSTROS; i++ ){
         Universo[i].rotacao = 0;
-        Universo[i].posicao = pontoAleatorio(Min, Max);
+        Universo[i].posicao = pontoAleatorioMonstro(Min, Max, i, NMONSTROS);
 
         Universo[i].modelo = desenhaMonstro;
 
