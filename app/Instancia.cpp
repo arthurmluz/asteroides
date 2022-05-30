@@ -48,8 +48,9 @@ Instancia::Instancia()
     rotacao = 0;
     posicao = Ponto(0,0,0);
     escala = Ponto(1,1,1);
+    dir = Ponto(0, 0, 0);
 }
-void Instancia::desenha()
+void Instancia::desenha(int num)
 {
     //cout << "Desenhou..." << endl;
     // aplica as transformacoes geometricas no modelo
@@ -63,8 +64,7 @@ void Instancia::desenha()
     InstanciaPonto(Origem, PosicaoDoPersonagem);
     //PosicaoDoPersonagem.imprime(); cout << endl;
     
-    (*modelo)();
+    (*modelo)(num);
     
     glPopMatrix();
 }
-

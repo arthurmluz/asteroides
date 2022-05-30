@@ -13,20 +13,23 @@
 using namespace std;
 
 #include "Poligono.h"
-typedef void TipoFuncao();
+typedef void TipoFuncao(int num);
 
 class Instancia{
 public:
     //Poligono *modelo;
-    int nroCurva;
+    int vidas = 1; // nao consigo deletar sem bugar
+    float raio;
     float tAtual;
+    double tempoInicial, comprimentoCurva, velocidade;
+    vector<Instancia> tiros;
+    int delay = 0;
     float deltaT = 1.0/50;
     Instancia();
     TipoFuncao *modelo;
-    Ponto posicao, escala;
+    Ponto posicao, escala, dir;
     float rotacao;
-    void desenha();
-    void setModelo(Poligono *P);
+    void desenha(int num);
 };
 
 

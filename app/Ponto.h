@@ -11,12 +11,14 @@
 
 #include <iostream>
 #include <cmath>
+#include "Cor.h"
 using namespace std;
 
 class Ponto {
 
 public:
     float x,y,z;
+    Cor cor;
     Ponto ();
     Ponto(float x, float y, float z=0);
     void set(float x, float y, float z=0);
@@ -41,6 +43,7 @@ bool operator==(Ponto P1, Ponto P2);
 Ponto operator+(Ponto P1, Ponto P2);
 Ponto operator- (Ponto P1, Ponto P2);
 Ponto operator* (Ponto P1, float k);
+Ponto operator/ (Ponto P1, float k);
 Ponto operator-(Ponto P1);
 
 double ProdEscalar(Ponto v1, Ponto v2);

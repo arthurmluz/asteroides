@@ -10,6 +10,7 @@
 using namespace std;
 
 #include "Poligono.h"
+#include "Cor.h"
 
 Poligono::Poligono()
 {
@@ -58,6 +59,28 @@ void Poligono::desenhaVertices()
         glVertex3f(Vertices[i].x,Vertices[i].y,Vertices[i].z);
     glEnd();
 }
+
+void DesenhaRetangulo(Ponto pnt)
+{
+    glBegin(GL_QUADS);
+        glVertex2d(pnt.x-0.5, pnt.y-0.5);
+        glVertex2d(pnt.x-0.5, pnt.y+0.5);
+        glVertex2d(pnt.x+0.5, pnt.y+0.5);
+        glVertex2d(pnt.x+0.5, pnt.y-0.5);
+    glEnd();
+}
+
+void Poligono::desenhaVerticesColoridas()
+{
+    for (int i=0; i<Vertices.size(); i++){
+        Cor a = Vertices[i].cor;
+        glColor3f(a.r/255.0, a.g/255.0, a.b/255.0);
+        DesenhaRetangulo(Vertices[i]);
+        //glVertex3f(Vertices[i].x,Vertices[i].y,Vertices[i].z);
+
+    }
+}
+
 void Poligono::imprime()
 {
     for (int i=0; i<Vertices.size(); i++)
@@ -107,6 +130,57 @@ void Poligono::LePoligono(const char *nome)
         //nLinha++;
         insereVertice(Ponto(x,y));
     }
+    cout << "Poligono lido com sucesso!" << endl;
+
+}
+
+// **********************************************************************
+//
+// **********************************************************************
+void Poligono::LeObjeto(const char *nome){
+    ifstream input;            // ofstream arq;
+    input.open(nome, ios::in); //arq.open(nome, ios::out);
+    if (!input)
+    {
+        cout << "Erro ao abrir " << nome << ". " << endl;
+        exit(0);
+    }
+    cout << "Lendo arquivo " << nome << "...";
+    string S;
+    //int nLinha = 0;
+
+    std::string a;
+    getline(input, a); // #CORES
+
+    unsigned int qtdCores;
+    input >> qtdCores;
+
+    Cor cores[qtdCores];
+    for(int i = 0; i < qtdCores; i++){
+        int tmp, r, g, b;
+
+        // le as cores
+        input >> tmp >> cores[i].r >> cores[i].g >> cores[i].b >> a;
+        //cout << "R: " << cores[i].r << " G: " << cores[i].g << " B: " << cores[i].b << endl;
+    }
+
+    // linha vazia
+    input >> a;
+
+    int lin, col;
+    input >> lin >> col;
+//    cout << "lin: " << lin << " col: " << col << endl;
+
+    int tmp;
+    for(int y = lin-1; y >= 0; y--){
+        for(int x = 0; x < col; x++){
+            input >> tmp;
+            Ponto pnt = Ponto(x,y);
+            pnt.cor = cores[tmp-1];
+            insereVertice(pnt);
+        }
+    }
+
     cout << "Poligono lido com sucesso!" << endl;
 
 }
