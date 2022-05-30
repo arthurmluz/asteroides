@@ -72,7 +72,7 @@ Modelo monstro[MODELOS_MONSTROS], disparador;
 Ponto Min, Max;
 
 // pausar (P) e debug (D)
-bool pause = false, debug = true, imune = false;
+bool pause = false, debug = false, imune = false;
 
 // tiros do jogador
 int atirados = 0;
@@ -105,8 +105,8 @@ void CriaCurvas()
 {
     for(int i = 0; i < NMONSTROS; i++){
         curvas[i][0] = pontoAleatorioMonstro(Min, Max, i, NMONSTROS);
-        curvas[i][1] = Ponto(0, 0);
-        curvas[i][2] = Ponto(0, 0);
+        curvas[i][1] = pontoAleatorio(Min, Max);
+        curvas[i][2] = pontoAleatorio(Min, Max);
     }
 }
 // **************************************************************
@@ -153,10 +153,10 @@ void animate()
     }
     if (TempoTotal > 5.0)
     {
-//        cout << "Tempo Acumulado: "  << TempoTotal << " segundos. " ;
+ //       cout << "Tempo Acumulado: "  << TempoTotal << " segundos. " ;
 //        cout << "Nros de Frames sem desenho: " << nFrames << endl;
 //        cout << "FPS(sem desenho): " << nFrames/TempoTotal << endl;
-        TempoTotal = 0;
+ //       TempoTotal = 0;
         nFrames = 0;
     }
 }
@@ -287,7 +287,7 @@ void CriaInstancias()
     jogador.modelo = desenhaDisparador;
 
     //jogador.escala = Ponto(escala/20, escala/20, escala/20);
-    jogador.escala = Ponto(TAM_MAPA/(100.0 * (col/10)), TAM_MAPA/(100.0 * (col/10)), TAM_MAPA/100.0);
+    jogador.escala = Ponto(TAM_MAPA/(100.0 * (lin/10)), TAM_MAPA/(100.0 * (lin/10)), TAM_MAPA/100.0);
 
     if( lin > col ) 
         jogador.raio = lin/2 * jogador.escala.x;
@@ -300,7 +300,7 @@ void CriaInstancias()
 
     for(int i = 0; i < NMONSTROS; i++ ){
         Universo[i].rotacao = 0;
-        //Universo[i].posicao = pontoAleatorioMonstro(Min, Max, i, NMONSTROS);
+        Universo[i].posicao = curvas[i][0];
 //        Universo[i].escala = Ponto( escala/10, escala/10, escala/10);
         Universo[i].escala = Ponto(TAM_MAPA/100.0, TAM_MAPA/100.0, TAM_MAPA/100.0);
 
@@ -372,7 +372,7 @@ void animaMonstros(){
         pontosUteis[1] = pontoAleatorio(Min, Max);
 
         defineCor(MandarinOrange);
-        andarNaBezier(Universo[i], pontosUteis, curvas[i]);
+        andarNaBezier(Universo[i], pontosUteis, curvas[i], TempoTotal);
         Universo[i].desenha(i);
 
         if(debug){

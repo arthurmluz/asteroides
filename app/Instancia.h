@@ -21,6 +21,7 @@ public:
     int vidas = 1; // nao consigo deletar sem bugar
     float raio;
     float tAtual;
+    double tempoInicial, comprimentoCurva, velocidade;
     vector<Instancia> tiros;
     int delay = 0;
     float deltaT = 1.0/50;
