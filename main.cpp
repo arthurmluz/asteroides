@@ -104,7 +104,7 @@ void CarregaModelos()
 void CriaCurvas()
 {
     for(int i = 0; i < NMONSTROS; i++){
-        curvas[i][0] = pontoAleatorioMonstro(Min, Max, i, NMONSTROS);
+        curvas[i][0] = pontoAleatorioMonstro(Min, Max, i, MODELOS_MONSTROS);
         curvas[i][1] = pontoAleatorio(Min, Max);
         curvas[i][2] = pontoAleatorio(Min, Max);
     }
@@ -491,6 +491,7 @@ void testaColisao(){
                 Universo[i].vidas--;
                 tiro.vidas = 0;
                 monstrosVivos--;
+                tiro.posicao.x = TAM_MAPA+TAM_MAPA;
             }
         }
 
@@ -508,7 +509,6 @@ void display( void )
     // Define os limites l�gicos da �rea OpenGL dentro da Janela
 	glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-
 	// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	// Coloque aqui as chamadas das rotinas que desenham os objetos
 	// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -540,9 +540,15 @@ void display( void )
         desenhaDerrota();
     }
 
-    if(monstrosVivos == 0 && NMONSTROS != 0 ){
-        pause = true;
-        desenhaVitoria();
+    if(monstrosVivos <= 0 && NMONSTROS != 0 ){
+        monstrosVivos = 0;
+        for(int i = 0; i < NMONSTROS; i++){
+            if(Universo[i].vidas > 0) monstrosVivos++;
+        }
+        if(monstrosVivos == 0){
+            pause = true;
+            desenhaVitoria();
+        }
     }
 
     desenhaVidas();
