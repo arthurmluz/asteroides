@@ -71,7 +71,7 @@ Poligono monstro[MODELOS_MONSTROS], disparador, tiro, derrota, vitoria;
 Ponto Min, Max;
 
 // pausar (P) e debug (D)
-bool pause = false, debug = true;
+bool pause = false, debug = true, imune = false;
 
 // tiros do jogador
 int atirados = 0;
@@ -103,7 +103,7 @@ void CarregaModelos()
 void CriaCurvas()
 {
     for(int i = 0; i < NMONSTROS; i++){
-        curvas[i][0] = pontoAleatorio(Min, Max);
+        curvas[i][0] = pontoAleatorioMonstro(Min, Max, i, NMONSTROS);
         curvas[i][1] = Ponto(0, 0);
         curvas[i][2] = Ponto(0, 0);
     }
@@ -242,7 +242,8 @@ void desenhaMonstro(int num){
 
 void desenhaVidas(){
     float xTopo = Min.x, yTopo = Max.y;
-    constexpr float deslocX = (3* TAM_MAPA/100), deslocY = (12.2 * TAM_MAPA/100);
+    //constexpr float deslocX = (3* TAM_MAPA/100), deslocY = (12.2 * TAM_MAPA/100);
+    float deslocX = (3* jogador.escala.x), deslocY = (35 * jogador.escala.y);
 
     for(int i = 0; i < jogador.vidas; i++){
         glPushMatrix();
@@ -289,30 +290,33 @@ void CriaInstancias()
     jogador.rotacao = 0;
     jogador.modelo = desenhaDisparador;
 
-    if( max.x > max.y ) 
-        jogador.raio = (max.x/5) * TAM_MAPA/100; 
-    else
-        jogador.raio = (max.y/5) * TAM_MAPA/100;  
-
     //jogador.escala = Ponto(escala/20, escala/20, escala/20);
     jogador.escala = Ponto(TAM_MAPA/(100.0 * (max.x/10)), TAM_MAPA/(100.0 * (max.y/10)), TAM_MAPA/100.0);
+
+    if( max.x > max.y ) 
+        jogador.raio = max.x/2 * jogador.escala.x;
+        //jogador.raio = (max.x/5) * jogador.escala.x;//TAM_MAPA/100; 
+    else
+        jogador.raio = max.y/2 * jogador.escala.x;
+        //jogador.raio = (max.y/5) * jogador.escala.x;//TAM_MAPA/100;  
+
     jogador.vidas = NVIDAS;
 
     for(int i = 0; i < NMONSTROS; i++ ){
         Universo[i].rotacao = 0;
-        Universo[i].posicao = pontoAleatorioMonstro(Min, Max, i, NMONSTROS);
+        //Universo[i].posicao = pontoAleatorioMonstro(Min, Max, i, NMONSTROS);
+//        Universo[i].escala = Ponto( escala/10, escala/10, escala/10);
+        Universo[i].escala = Ponto(TAM_MAPA/100.0, TAM_MAPA/100.0, TAM_MAPA/100.0);
 
         Universo[i].modelo = desenhaMonstro;
 
         Ponto min, max;
         monstro[i%MODELOS_MONSTROS].obtemLimites(min, max);
         if( max.x > max.y ) 
-            Universo[i].raio = (1.5+max.x/2) * TAM_MAPA/100; 
+            Universo[i].raio = (1.5+max.x/2) * Universo[i].escala.x ;//TAM_MAPA/100; 
         else
-            Universo[i].raio = (1.5+max.y/2) * TAM_MAPA/100; 
+            Universo[i].raio = (1.5+max.y/2) * Universo[i].escala.y ;//TAM_MAPA/100; 
 
-//        Universo[i].escala = Ponto( escala/2, escala/2, escala/2);
-        Universo[i].escala = Ponto(TAM_MAPA/100.0, TAM_MAPA/100.0, TAM_MAPA/100.0);
     }
 
 }
@@ -408,6 +412,7 @@ void animaJogador(){
 }
 
 void animaTiros(){
+    int idx = 0;
     for(Instancia &it: jogador.tiros){
         it.posicao = it.posicao + it.dir;
 
@@ -415,22 +420,27 @@ void animaTiros(){
             it.desenha(0);
         if( it.posicao.x > Max.x || it.posicao.x < Min.x || it.posicao.y > Max.x || it.posicao.y < Min.y ){
             atirados--;
-            jogador.tiros.erase(jogador.tiros.begin());
+            jogador.tiros.erase(jogador.tiros.begin()+idx);
+            idx--;
         }
+        idx++;
     }
     for(int i = 0; i < NMONSTROS; i++){
+        idx = 0;
         for(Instancia &it: Universo[i].tiros){
             it.posicao = it.posicao + it.dir;
             if(it.vidas > 0)
                 it.desenha(1);
             if( it.posicao.x > Max.x || it.posicao.x < Min.x || it.posicao.y > Max.x || it.posicao.y < Min.y ){
-                Universo[i].tiros.erase(Universo[i].tiros.begin());
+                Universo[i].tiros.erase(Universo[i].tiros.begin()+idx);
+                idx--;
             }
         }
+        idx++;
     }
 }
 
-
+// funcao copiada da internet (usada apenas para debugar visualizando o raio)
 void DrawCircle(Ponto C, float r, int num_segments) {
     glBegin(GL_LINE_LOOP);
     for (int ii = 0; ii < num_segments; ii++)   {
@@ -451,7 +461,8 @@ void testaColisao(){
             if(tiro.vidas <= 0) continue;
             float dist = sqrt(pow(tiro.posicao.x - jogador.posicao.x, 2) + pow(tiro.posicao.y - jogador.posicao.y, 2)); 
             if(dist < jogador.raio){
-                jogador.vidas--;
+                if(!imune)
+                    jogador.vidas--;
                 tiro.vidas = 0;
             }
         }
@@ -468,9 +479,12 @@ void testaColisao(){
 
         float dist = sqrt(pow(jogador.posicao.x - Universo[i].posicao.x, 2) + pow(jogador.posicao.y - Universo[i].posicao.y, 2)); 
         if( dist < jogador.raio + Universo[i].raio ){
-            jogador.vidas--;
-            Universo[i].vidas--;
-            monstrosVivos--;
+
+            if(!imune){
+                jogador.vidas--;
+                Universo[i].vidas--;
+                monstrosVivos--;
+            }
         }
 
         // colisão tiros do jogador contra monstros
@@ -515,6 +529,9 @@ void display( void )
     
     //glPointSize(TAM_MAPA*10/100.0);
 
+
+    glLineWidth(1);
+    glPointSize(1);
     animaJogador();
 
     animaTiros();
@@ -604,6 +621,9 @@ void keyboard ( unsigned char key, int x, int y )
             break;
         case 'd':
             debug = !debug;
+            break;
+        case 'b':
+            imune = !imune;
             break;
         default:
 			break;
