@@ -24,22 +24,18 @@ Ponto pontoAleatorioMonstro(Ponto min, Ponto max, int n, int NMONSTRO){
         case 0:
            x = RandomFloat(min.x, max.x);
            y = RandomFloat(max.y, max.y+max.y);
-           printf("0 %f, %f\n", x, y);
            break;
         case 1:
            x = RandomFloat(min.x, min.x-max.x);
            y = RandomFloat(min.y, max.y);
-           printf(" 1 %f, %f\n", x, y);
            break; 
         case 2:
            x = RandomFloat(min.x, max.x);
            y = RandomFloat(min.y, min.y-max.y);
-           printf("2 %f, %f\n", x, y);
            break;
         default:
            x = RandomFloat(max.x, max.x+max.x);
            y = RandomFloat(min.y, max.y);
-           printf(" 3 %f, %f\n", x, y);
     }
     
     if( x == 0 || y == 0) return pontoAleatorioMonstro(min, max, n, NMONSTRO);

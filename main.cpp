@@ -37,6 +37,7 @@ using namespace std;
 
 #include "app/Ponto.h"
 #include "app/Instancia.h"
+#include "app/Modelo.h"
 
 #include "app/Temporizador.h"
 #include "app/ListaDeCoresRGB.h"
@@ -53,7 +54,6 @@ using namespace std;
 #define TAM_MAPA 100 // MIN(TAM_MAPA, TAM_MAPA)  MAX(TAM_MAPA, TAM_MAPA)
 #define TAM_JANELA 800
 
-#define MONSTER_POINT_SCALE 6
 Temporizador T;
 double AccumDeltaT=0;
 
@@ -65,7 +65,8 @@ Instancia jogador, teste;
 Ponto curvas[NMONSTROS][3];
 
 // Modelo dos personagens
-Poligono monstro[MODELOS_MONSTROS], disparador, tiro, derrota, vitoria;
+Poligono tiro, derrota, vitoria;
+Modelo monstro[MODELOS_MONSTROS], disparador;
 
 // Limites l�gicos da �rea de desenho
 Ponto Min, Max;
@@ -206,13 +207,11 @@ void DesenhaEixos()
 }
 
 void desenhaDisparador(int num){
-    Ponto a, b;
-    disparador.obtemLimites(a, b);
+    int lin, col;
+    disparador.obtemLimites(lin, col);
     glPushMatrix();
-        glPointSize(1);
-        glTranslatef(-(b.x/2), -(b.y/2), 0);
+        glTranslatef(-(col/2), -(lin/2), 0);
         disparador.desenhaVerticesColoridas();
-        glPointSize(1);
     glPopMatrix();
 }
 
@@ -229,14 +228,11 @@ void desenhaTiro(int num){
 }
 
 void desenhaMonstro(int num){
-    Ponto a, b;
-    monstro[num%MODELOS_MONSTROS].obtemLimites(a, b);
+    int lin, col;
+    monstro[num%MODELOS_MONSTROS].obtemLimites(lin, col);
     glPushMatrix();
-        glPointSize(MONSTER_POINT_SCALE);
-        //glTranslatef(-5, 0,0 );
-        glTranslatef(-(b.x/2), -(b.y/2), 0);
+        glTranslatef(-(col/2), -(lin/2), 0);
         monstro[num%MODELOS_MONSTROS].desenhaVerticesColoridas();
-        glPointSize(1);
     glPopMatrix();
 }
 
@@ -284,20 +280,20 @@ void desenhaVitoria(){
 void CriaInstancias()
 {
 
-    Ponto min, max;
-    disparador.obtemLimites(min, max);
+    int lin, col;
+    disparador.obtemLimites(lin, col);
     jogador.posicao = Ponto(0,0) ;
     jogador.rotacao = 0;
     jogador.modelo = desenhaDisparador;
 
     //jogador.escala = Ponto(escala/20, escala/20, escala/20);
-    jogador.escala = Ponto(TAM_MAPA/(100.0 * (max.x/10)), TAM_MAPA/(100.0 * (max.y/10)), TAM_MAPA/100.0);
+    jogador.escala = Ponto(TAM_MAPA/(100.0 * (col/10)), TAM_MAPA/(100.0 * (col/10)), TAM_MAPA/100.0);
 
-    if( max.x > max.y ) 
-        jogador.raio = max.x/2 * jogador.escala.x;
+    if( lin > col ) 
+        jogador.raio = lin/2 * jogador.escala.x;
         //jogador.raio = (max.x/5) * jogador.escala.x;//TAM_MAPA/100; 
     else
-        jogador.raio = max.y/2 * jogador.escala.x;
+        jogador.raio = col/2 * jogador.escala.x;
         //jogador.raio = (max.y/5) * jogador.escala.x;//TAM_MAPA/100;  
 
     jogador.vidas = NVIDAS;
@@ -310,12 +306,12 @@ void CriaInstancias()
 
         Universo[i].modelo = desenhaMonstro;
 
-        Ponto min, max;
-        monstro[i%MODELOS_MONSTROS].obtemLimites(min, max);
-        if( max.x > max.y ) 
-            Universo[i].raio = (1.5+max.x/2) * Universo[i].escala.x ;//TAM_MAPA/100; 
+        int min, max;
+        monstro[i%MODELOS_MONSTROS].obtemLimites(lin, col);
+        if( lin > col ) 
+            Universo[i].raio = (1.5+lin/2) * Universo[i].escala.x ;//TAM_MAPA/100; 
         else
-            Universo[i].raio = (1.5+max.y/2) * Universo[i].escala.y ;//TAM_MAPA/100; 
+            Universo[i].raio = (1.5+col/2) * Universo[i].escala.y ;//TAM_MAPA/100; 
 
     }
 
