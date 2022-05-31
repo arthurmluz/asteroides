@@ -47,7 +47,7 @@ using namespace std;
 #include "util/util.h"
 #include "util/movimentos.h"
 
-#define NMONSTROS 4 
+#define NMONSTROS 1 
 #define NVIDAS 3 
 #define MODELOS_MONSTROS 4
 #define NTIROS 10
@@ -222,7 +222,7 @@ void desenhaTiro(int num){
             defineCor(Yellow);
         else
             defineCor(Red);
-        //glTranslatef(-0.25, 0, 0);
+        glTranslatef(-0.05, 0, 0);
         tiro.pintaPoligono();
     glPopMatrix();
 }
