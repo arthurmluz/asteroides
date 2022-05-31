@@ -47,10 +47,16 @@ using namespace std;
 #include "util/util.h"
 #include "util/movimentos.h"
 
-#define NMONSTROS 1 
 #define NVIDAS 3 
-#define MODELOS_MONSTROS 4
 #define NTIROS 10
+#define VELOC_TIROS 1
+
+#define NMONSTROS 4
+#define MODELOS_MONSTROS 4
+#define VELOC_TIROS_INIMIGOS 1 // multiplicador de velocidade
+#define DELAY_TIROS_INIMIGOS 3 // delay para atirar de novo
+#define RAND_TIROS_INIMIGOS 20 // chance de atirar 
+
 #define TAM_MAPA 100 // MIN(TAM_MAPA, TAM_MAPA)  MAX(TAM_MAPA, TAM_MAPA)
 #define TAM_JANELA 800
 
@@ -320,7 +326,7 @@ void CriaInstancias()
 // ****************************************************************
 
 void atirar(){
-    if(atirados == 10) return;
+    if(atirados == NTIROS+1) return;
 
     jogador.tiros.push_back(Instancia());
     Instancia &novoTiro = jogador.tiros.back();
@@ -356,7 +362,7 @@ void atirarMonstro(Instancia &atirador){
     novoTiro.dir = Ponto(xr, yr) * TAM_MAPA/100.0;
 
     novoTiro.posicao = novoTiro.dir*3 + atirador.posicao; 
-    atirador.delay = 3;
+    atirador.delay = DELAY_TIROS_INIMIGOS;
 }
 
 
@@ -382,7 +388,7 @@ void animaMonstros(){
             TracaPontosDeControle(curvas[i]);
         }
 
-        if( rand() % 20 == 0) atirarMonstro(Universo[i]);
+        if( rand() % RAND_TIROS_INIMIGOS == 0) atirarMonstro(Universo[i]);
 
     }
 }
@@ -410,7 +416,11 @@ void animaJogador(){
 void animaTiros(){
     int idx = 0;
     for(Instancia &it: jogador.tiros){
-        it.posicao = it.posicao + it.dir;
+
+        if(VELOC_TIROS < 5 && VELOC_TIROS > 0)
+            it.posicao = it.posicao + it.dir*VELOC_TIROS;
+        else
+            it.posicao = it.posicao + it.dir*5;
 
         if(it.vidas > 0)
             it.desenha(0);
@@ -424,7 +434,10 @@ void animaTiros(){
     for(int i = 0; i < NMONSTROS; i++){
         idx = 0;
         for(Instancia &it: Universo[i].tiros){
-            it.posicao = it.posicao + it.dir;
+            if(VELOC_TIROS_INIMIGOS < 5 && VELOC_TIROS_INIMIGOS > 0)
+                it.posicao = it.posicao + it.dir*VELOC_TIROS_INIMIGOS;
+            else
+                it.posicao = it.posicao + it.dir*5;
             if(it.vidas > 0)
                 it.desenha(1);
             if( it.posicao.x > Max.x || it.posicao.x < Min.x || it.posicao.y > Max.x || it.posicao.y < Min.y ){
